@@ -1,0 +1,28 @@
+/**
+ * Design tokens for YogiSpeaks — see docs/DESIGN_SYSTEM.md.
+ * Admin can override these at runtime via CSS variables on `<html>`.
+ */
+:root {
+  --color-primary: #0a192f;
+  --color-primary-dark: #050a18;
+  --color-secondary: #112240;
+  --color-accent: #c49b48;
+  --color-accent-hover: #b0883a;
+  --color-background: #ffffff;
+  --color-surface: #f9f9f9;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --color-on-dark: #ffffff;
+  --color-on-dark-muted: #c9d1d9;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-border: #e5e7eb;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  --container-width: 1280px;
+}

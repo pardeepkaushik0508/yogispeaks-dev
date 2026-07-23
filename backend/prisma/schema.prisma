@@ -1,0 +1,740 @@
+// YogiSpeaks CMS schema — communication coaching only; no travel/package entities.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum InquiryType {
+  ASSESSMENT
+  CONTACT
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  ENROLLED
+  CLOSED
+  SPAM
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  UNSUBSCRIBED
+}
+
+enum NavLocation {
+  HEADER
+  FOOTER_QUICK
+  FOOTER_PROGRAMS
+}
+
+enum HomepageSectionKey {
+  HERO
+  STATS
+  FEATURES
+  FAQS
+  COURSES_FEATURED
+  TESTIMONIALS
+  LEARNING_STEPS
+  BENEFITS
+  BOTTOM_CTA
+  NEWSLETTER
+}
+
+enum RoleCode {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+enum MediaProvider {
+  LOCAL
+  CLOUDINARY
+  S3
+}
+
+// ─── Auth & RBAC ─────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id               String      @id @default(uuid()) @db.Uuid
+  email            String      @unique @db.Citext
+  passwordHash     String
+  fullName         String
+  status           AdminStatus @default(ACTIVE)
+  failedLoginCount Int         @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  createdById      String?     @db.Uuid
+  updatedById      String?     @db.Uuid
+  deletedAt        DateTime?
+
+  createdBy AdminUser?  @relation("AdminUserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy AdminUser?  @relation("AdminUserUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdUsers AdminUser[] @relation("AdminUserCreatedBy")
+  updatedUsers AdminUser[] @relation("AdminUserUpdatedBy")
+
+  roles              AdminUserRole[]
+  refreshSessions    RefreshSession[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs          AuditLog[]
+  inquiryNotes       InquiryNote[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("admin_users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        RoleCode @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  adminUsers  AdminUserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model AdminUserRole {
+  id          String   @id @default(uuid()) @db.Uuid
+  adminUserId String   @db.Uuid
+  roleId      String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([adminUserId, roleId])
+  @@index([roleId])
+  @@map("admin_user_roles")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid()) @db.Uuid
+  roleId       String   @db.Uuid
+  permissionId String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model RefreshSession {
+  id           String    @id @default(uuid()) @db.Uuid
+  adminUserId  String    @db.Uuid
+  tokenHash    String
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?   @db.Uuid
+  createdAt    DateTime  @default(now())
+
+  adminUser  AdminUser       @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  replacedBy RefreshSession? @relation("RefreshSessionRotation", fields: [replacedById], references: [id], onDelete: SetNull)
+  replaces   RefreshSession[] @relation("RefreshSessionRotation")
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@map("refresh_sessions")
+}
+
+model PasswordResetToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  adminUserId String    @db.Uuid
+  tokenHash   String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── Site configuration ──────────────────────────────────────────────────────
+
+model SiteSetting {
+  id String @id @default(uuid()) @db.Uuid
+
+  businessName String @default("YogiSpeaks")
+  tagline      String?
+
+  logoMediaId    String? @db.Uuid
+  faviconMediaId String? @db.Uuid
+
+  brandPrimary     String?
+  brandPrimaryDark String?
+  brandSecondary   String?
+  brandAccent      String?
+  brandBackground  String?
+  brandSurface     String?
+  brandText        String?
+  brandMuted       String?
+
+  fontHeading String?
+  fontBody    String?
+
+  phone     String?
+  whatsapp  String?
+  email     String?
+  officeAddress String? @db.Text
+
+  googleMapsUrl   String?
+  googleMapsEmbed String? @db.Text
+  businessHours   String?
+
+  socialLinks Json?
+
+  defaultMetaTitle       String?
+  defaultMetaDescription String?
+  defaultCanonicalUrl    String?
+  defaultOgTitle         String?
+  defaultOgDescription   String?
+  defaultOgImageId       String? @db.Uuid
+  defaultRobotsIndex     Boolean @default(true)
+  defaultRobotsFollow    Boolean @default(true)
+
+  googleBusinessProfileUrl String?
+  googleReviewsUrl         String?
+
+  showTopBar      Boolean @default(true)
+  phoneLabel      String?
+  phoneValue      String?
+  emailLabel      String?
+  emailValue      String?
+  socialVisibility Json?
+
+  headerCtaLabel    String?
+  headerCtaHref     String?
+  headerCtaIsVisible Boolean @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?  @db.Uuid
+  updatedById String?  @db.Uuid
+
+  logoMedia        MediaAsset? @relation("SiteSettingLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  faviconMedia     MediaAsset? @relation("SiteSettingFavicon", fields: [faviconMediaId], references: [id], onDelete: SetNull)
+  defaultOgImage   MediaAsset? @relation("SiteSettingOgImage", fields: [defaultOgImageId], references: [id], onDelete: SetNull)
+
+  @@map("site_settings")
+}
+
+model NavigationItem {
+  id           String      @id @default(uuid()) @db.Uuid
+  label        String
+  href         String
+  location     NavLocation
+  parentId     String?     @db.Uuid
+  sortOrder    Int         @default(0)
+  isVisible    Boolean     @default(true)
+  openInNewTab Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  createdById  String?     @db.Uuid
+  updatedById  String?     @db.Uuid
+
+  parent   NavigationItem?  @relation("NavigationTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children NavigationItem[] @relation("NavigationTree")
+
+  @@index([location, sortOrder])
+  @@index([parentId])
+  @@index([isVisible])
+  @@map("navigation_items")
+}
+
+// ─── Homepage ────────────────────────────────────────────────────────────────
+
+model HomepageSection {
+  id                String             @id @default(uuid()) @db.Uuid
+  key               HomepageSectionKey @unique
+  eyebrow           String?
+  title             String?
+  subtitle          String?
+  bodyHtml          String?            @db.Text
+  primaryCtaLabel   String?
+  primaryCtaHref    String?
+  secondaryCtaLabel String?
+  secondaryCtaHref  String?
+  mediaId           String?            @db.Uuid
+  extraJson         Json?
+  isVisible         Boolean            @default(true)
+  sortOrder         Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  createdById       String?            @db.Uuid
+  updatedById       String?            @db.Uuid
+
+  media MediaAsset? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  @@index([isVisible, sortOrder])
+  @@map("homepage_sections")
+}
+
+model HomepageStat {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String
+  value     String
+  iconKey   String?
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, sortOrder])
+  @@map("homepage_stats")
+}
+
+model Feature {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  description  String   @db.Text
+  iconKey      String?
+  iconMediaId  String?  @db.Uuid
+  sortOrder    Int      @default(0)
+  isVisible    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String?  @db.Uuid
+  updatedById  String?  @db.Uuid
+
+  iconMedia MediaAsset? @relation(fields: [iconMediaId], references: [id], onDelete: SetNull)
+
+  @@index([isVisible, sortOrder])
+  @@map("features")
+}
+
+model LearningStep {
+  id          String   @id @default(uuid()) @db.Uuid
+  stepNumber  Int
+  title       String
+  description String   @db.Text
+  iconKey     String?
+  sortOrder   Int      @default(0)
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?  @db.Uuid
+  updatedById String?  @db.Uuid
+
+  @@index([isVisible, sortOrder])
+  @@map("learning_steps")
+}
+
+model BenefitItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, sortOrder])
+  @@map("benefit_items")
+}
+
+// ─── Courses ─────────────────────────────────────────────────────────────────
+
+model Course {
+  id                 String        @id @default(uuid()) @db.Uuid
+  name               String
+  slug               String        @unique
+  shortDescription   String        @db.Text
+  longDescriptionHtml String       @db.Text
+  featuredImageId    String?       @db.Uuid
+  duration           String
+  mode               String
+  feeAmount          Decimal?      @db.Decimal(10, 2)
+  feeCurrency        String?
+  feeDisplayEnabled  Boolean       @default(false)
+  eligibilityHtml    String?       @db.Text
+  whoShouldJoinHtml  String?       @db.Text
+  ctaLabel           String?
+  ctaHref            String?
+  metaTitle          String?
+  metaDescription    String?
+  canonicalUrl       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImageId          String?       @db.Uuid
+  robotsIndex        Boolean       @default(true)
+  robotsFollow       Boolean       @default(true)
+  status             PublishStatus @default(DRAFT)
+  isFeatured         Boolean       @default(false)
+  sortOrder          Int           @default(0)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  createdById        String?       @db.Uuid
+  updatedById        String?       @db.Uuid
+  deletedAt          DateTime?
+
+  featuredImage MediaAsset? @relation("CourseFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+  ogImage       MediaAsset? @relation("CourseOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  benefits         CourseBenefit[]
+  curriculumItems  CourseCurriculumItem[]
+  galleryItems     CourseGalleryItem[]
+  inquiries        Inquiry[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@index([isFeatured])
+  @@index([isFeatured, sortOrder])
+  @@map("courses")
+}
+
+model CourseBenefit {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @db.Uuid
+  label     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, sortOrder])
+  @@map("course_benefits")
+}
+
+model CourseCurriculumItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @db.Uuid
+  title     String
+  bodyHtml  String?  @db.Text
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, sortOrder])
+  @@map("course_curriculum_items")
+}
+
+model CourseGalleryItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @db.Uuid
+  mediaId   String   @db.Uuid
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  media  MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@index([courseId, sortOrder])
+  @@index([mediaId])
+  @@map("course_gallery_items")
+}
+
+// ─── Social proof & FAQ ──────────────────────────────────────────────────────
+
+model Testimonial {
+  id              String   @id @default(uuid()) @db.Uuid
+  studentName     String
+  studentImageId  String?  @db.Uuid
+  designation     String
+  courseLabel     String?
+  review          String   @db.Text
+  rating          Int
+  isGoogleReview  Boolean  @default(false)
+  reviewUrl       String?
+  isVisible       Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdById     String?  @db.Uuid
+  updatedById     String?  @db.Uuid
+  deletedAt       DateTime?
+
+  studentImage MediaAsset? @relation(fields: [studentImageId], references: [id], onDelete: SetNull)
+
+  @@index([isVisible, sortOrder])
+  @@index([deletedAt])
+  @@map("testimonials")
+}
+
+model Faq {
+  id              String   @id @default(uuid()) @db.Uuid
+  question        String
+  answerHtml      String   @db.Text
+  category        String?
+  showOnHomepage  Boolean  @default(false)
+  isVisible       Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdById     String?  @db.Uuid
+  updatedById     String?  @db.Uuid
+  deletedAt       DateTime?
+
+  @@index([isVisible, sortOrder])
+  @@index([showOnHomepage])
+  @@index([deletedAt])
+  @@map("faqs")
+}
+
+// ─── Pages & blog ────────────────────────────────────────────────────────────
+
+model Page {
+  id              String        @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String        @unique
+  bodyHtml        String        @db.Text
+  heroImageId     String?       @db.Uuid
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImageId       String?       @db.Uuid
+  robotsIndex     Boolean       @default(true)
+  robotsFollow    Boolean       @default(true)
+  status          PublishStatus @default(DRAFT)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdById     String?       @db.Uuid
+  updatedById     String?       @db.Uuid
+  deletedAt       DateTime?
+
+  heroImage MediaAsset? @relation("PageHeroImage", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   MediaAsset? @relation("PageOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("pages")
+}
+
+model BlogCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?  @db.Uuid
+  updatedById String?  @db.Uuid
+
+  posts BlogPost[]
+
+  @@index([sortOrder])
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id              String        @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String        @unique
+  excerpt         String        @db.Text
+  bodyHtml        String        @db.Text
+  categoryId      String        @db.Uuid
+  authorName      String
+  featuredImageId String?       @db.Uuid
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImageId       String?       @db.Uuid
+  robotsIndex     Boolean       @default(true)
+  robotsFollow    Boolean       @default(true)
+  status          PublishStatus @default(DRAFT)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdById     String?       @db.Uuid
+  updatedById     String?       @db.Uuid
+  deletedAt       DateTime?
+
+  category      BlogCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  featuredImage MediaAsset?  @relation("BlogPostFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+  ogImage       MediaAsset?  @relation("BlogPostOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([deletedAt])
+  @@map("blog_posts")
+}
+
+// ─── Media ───────────────────────────────────────────────────────────────────
+
+model MediaAsset {
+  id          String        @id @default(uuid()) @db.Uuid
+  url         String
+  publicId    String?
+  provider    MediaProvider @default(LOCAL)
+  mimeType    String
+  byteSize    Int
+  width       Int?
+  height      Int?
+  alt         String?
+  title       String?
+  caption     String?
+  folder      String?
+  createdById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  siteSettingsLogo     SiteSetting[]       @relation("SiteSettingLogo")
+  siteSettingsFavicon  SiteSetting[]       @relation("SiteSettingFavicon")
+  siteSettingsOgImage  SiteSetting[]       @relation("SiteSettingOgImage")
+  homepageSections     HomepageSection[]
+  features             Feature[]
+  coursesFeatured      Course[]            @relation("CourseFeaturedImage")
+  coursesOgImage       Course[]            @relation("CourseOgImage")
+  courseGalleryItems   CourseGalleryItem[]
+  testimonials         Testimonial[]
+  pagesHero            Page[]              @relation("PageHeroImage")
+  pagesOgImage         Page[]              @relation("PageOgImage")
+  blogPostsFeatured    BlogPost[]          @relation("BlogPostFeaturedImage")
+  blogPostsOgImage     BlogPost[]          @relation("BlogPostOgImage")
+
+  @@index([provider])
+  @@index([folder])
+  @@index([deletedAt])
+  @@map("media_assets")
+}
+
+// ─── Leads & messaging ───────────────────────────────────────────────────────
+
+model Inquiry {
+  id                     String        @id @default(uuid()) @db.Uuid
+  type                   InquiryType
+  status                 InquiryStatus @default(NEW)
+  sourcePage             String?
+  fullName               String
+  email                  String
+  mobile                 String?
+  whatsapp               String?
+  interestedCourseId     String?       @db.Uuid
+  interestedCourseLabel  String?
+  communicationLevel     String?
+  learningGoal           String?
+  preferredTiming        String?
+  preferredContactMethod String?
+  message                String?       @db.Text
+  consentAccepted        Boolean       @default(false)
+  ipHash                 String?
+  userAgent              String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  deletedAt              DateTime?
+
+  interestedCourse Course?       @relation(fields: [interestedCourseId], references: [id], onDelete: SetNull)
+  notes            InquiryNote[]
+
+  @@index([type])
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([interestedCourseId])
+  @@map("inquiries")
+}
+
+model InquiryNote {
+  id          String   @id @default(uuid()) @db.Uuid
+  inquiryId   String   @db.Uuid
+  adminUserId String   @db.Uuid
+  body        String   @db.Text
+  createdAt   DateTime @default(now())
+
+  inquiry   Inquiry   @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Restrict)
+
+  @@index([inquiryId])
+  @@index([adminUserId])
+  @@map("inquiry_notes")
+}
+
+model NewsletterSubscriber {
+  id             String           @id @default(uuid()) @db.Uuid
+  email          String           @unique @db.Citext
+  status         SubscriberStatus @default(ACTIVE)
+  subscribedAt   DateTime         @default(now())
+  unsubscribedAt DateTime?
+  source         String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([status])
+  @@map("newsletter_subscribers")
+}
+
+model EmailTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  subject     String
+  bodyHtml    String   @db.Text
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("email_templates")
+}

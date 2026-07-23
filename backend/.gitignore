@@ -1,0 +1,11 @@
+# ── Dependencies / secrets ──────────────────────────────────────────────────
+node_modules/
+.env
+.env.*
+!.env.example
+
+# ── Build ───────────────────────────────────────────────────────────────────
+dist/
+coverage/
+*.tsbuildinfo
+uploads/
