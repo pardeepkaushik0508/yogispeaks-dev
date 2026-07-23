@@ -40,6 +40,8 @@ services:
       REDIS_URL: redis://redis:6379
     ports:
       - "4000:4000"
+    volumes:
+      - uploads_data:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/api/v1/health"]
       interval: 10s
@@ -77,3 +79,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
