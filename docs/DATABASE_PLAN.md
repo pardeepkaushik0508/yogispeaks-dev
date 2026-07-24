@@ -1,4 +1,4 @@
-# YogiSpeaks — Database Plan
+'C:\Program Files\PostgreSQL\18\bin\psql.exe' -U postgres -h localhost -c "CREATE DATABASE yogispeaks;"# YogiSpeaks — Database Plan
 
 ORM: **Prisma** · Database: **PostgreSQL** · IDs: **UUID**  
 Soft delete via `deletedAt` where content recovery matters.
