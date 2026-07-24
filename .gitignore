@@ -56,3 +56,6 @@ _phase1_extract/
 *.key
 credentials.json
 service-account*.json
+
+# ── Local PostgreSQL data ──────────────────────────────────────────────────
+.local-pg/

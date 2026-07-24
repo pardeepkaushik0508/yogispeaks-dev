@@ -9,6 +9,7 @@ import { JourneyBenefitsSection } from '@/components/home/JourneyBenefitsSection
 import { BottomCtaSection } from '@/components/home/BottomCtaSection';
 import { SiteFooter } from '@/components/home/SiteFooter';
 import { WhatsAppButton } from '@/components/home/WhatsAppButton';
+import { AssessmentModalProvider } from '@/components/home/AssessmentModal';
 import { siteContact } from '@/data/homepage';
 
 const siteUrl =
@@ -73,18 +74,20 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
-      <TopBar />
-      <SiteHeader />
-      <main id="main-content">
-        <HeroSection />
-        <FeaturesFaqSection />
-        <ProgramsSection />
-        <TestimonialsSection />
-        <JourneyBenefitsSection />
-        <BottomCtaSection />
-      </main>
-      <SiteFooter />
-      <WhatsAppButton />
+      <AssessmentModalProvider>
+        <TopBar />
+        <SiteHeader />
+        <main id="main-content">
+          <HeroSection />
+          <FeaturesFaqSection />
+          <ProgramsSection />
+          <TestimonialsSection />
+          <JourneyBenefitsSection />
+          <BottomCtaSection />
+        </main>
+        <SiteFooter />
+        <WhatsAppButton />
+      </AssessmentModalProvider>
     </>
   );
 }

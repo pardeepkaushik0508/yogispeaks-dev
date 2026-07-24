@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { bookAssessmentHref, navLinks } from '@/data/homepage';
+import { navLinks } from '@/data/homepage';
 import { BrandLogo } from '@/components/BrandLogo';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { cn } from '@/lib/cn';
@@ -33,9 +34,14 @@ function HamburgerIcon({ open }: { open: boolean }) {
 
 export function SiteHeader() {
   const reduceMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [coursesOpen, setCoursesOpen] = useState(false);
   const [mobileCoursesOpen, setMobileCoursesOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -59,15 +65,131 @@ export function SiteHeader() {
     setMobileCoursesOpen(false);
   };
 
+  const mobileMenu =
+    mounted &&
+    createPortal(
+      <AnimatePresence>
+        {mobileOpen ? (
+          <motion.div
+            key="mobile-nav"
+            id="mobile-nav"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+            className="fixed inset-0 z-[180] flex flex-col bg-white lg:hidden"
+            initial={reduceMotion ? false : { x: '100%', opacity: 0.6 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0.6 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+          >
+              <div className="flex h-[4.25rem] shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 sm:h-[4.75rem] sm:px-6">
+                <BrandLogo showTagline={false} onClick={closeMobile} />
+                <button
+                  type="button"
+                  className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-primary)] sm:size-11"
+                  aria-label="Close menu"
+                  onClick={closeMobile}
+                >
+                  <HamburgerIcon open />
+                </button>
+              </div>
+
+              <nav aria-label="Mobile" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+                <motion.ul
+                  className="mx-auto flex max-w-lg flex-col gap-1"
+                  initial={reduceMotion ? false : 'hidden'}
+                  animate="visible"
+                  variants={{
+                    hidden: {},
+                    visible: {
+                      transition: { staggerChildren: reduceMotion ? 0 : 0.05 },
+                    },
+                  }}
+                >
+                  {navLinks.map((link) => (
+                    <motion.li
+                      key={link.label}
+                      variants={{
+                        hidden: { opacity: 0, x: 16 },
+                        visible: { opacity: 1, x: 0 },
+                      }}
+                      transition={{ duration: 0.28, ease: 'easeOut' }}
+                    >
+                      {link.children ? (
+                        <div>
+                          <button
+                            type="button"
+                            className="flex w-full items-center justify-between rounded-xl px-3 py-3.5 text-left text-base font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)]"
+                            aria-expanded={mobileCoursesOpen}
+                            onClick={() => setMobileCoursesOpen((v) => !v)}
+                          >
+                            {link.label}
+                            <ChevronDown
+                              className={cn(
+                                'size-4 transition-transform duration-300',
+                                mobileCoursesOpen && 'rotate-180',
+                              )}
+                              aria-hidden="true"
+                            />
+                          </button>
+                          <AnimatePresence initial={false}>
+                            {mobileCoursesOpen ? (
+                              <motion.ul
+                                className="mb-1 ml-2 overflow-hidden border-l-2 border-[var(--color-accent)]/40 pl-3"
+                                initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.28, ease: 'easeInOut' }}
+                              >
+                                {link.children.map((child) => (
+                                  <li key={child.href}>
+                                    <Link
+                                      href={child.href}
+                                      className="block rounded-lg px-2 py-2.5 text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-accent)]"
+                                      onClick={closeMobile}
+                                    >
+                                      {child.label}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </motion.ul>
+                            ) : null}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <Link
+                          href={link.href}
+                          className="block rounded-xl px-3 py-3.5 text-base font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-accent)]"
+                          onClick={closeMobile}
+                        >
+                          {link.label}
+                        </Link>
+                      )}
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              </nav>
+
+              <div className="shrink-0 border-t border-[var(--color-border)] bg-white p-4 sm:p-6">
+                <ButtonLink
+                  href="#"
+                  openAssessment
+                  variant="header"
+                  className="w-full"
+                  onClick={closeMobile}
+                >
+                  BOOK FREE ASSESSMENT
+                </ButtonLink>
+              </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>,
+      document.body,
+    );
+
   return (
-    <header
-      className={cn(
-        'sticky top-0 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm',
-        mobileOpen ? 'z-[100]' : 'z-40',
-      )}
-    >
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-[4.25rem] max-w-[var(--container-width)] items-center justify-between gap-3 px-4 sm:h-[4.75rem] sm:gap-4 sm:px-6">
-        {/* Logo — shrinks safely, no overlap */}
         <div className="min-w-0 flex-1 overflow-hidden lg:flex-none">
           <BrandLogo
             showTagline
@@ -129,14 +251,16 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {/* Desktop only — avoids overlap with hamburger on tablet/mobile */}
-          <ButtonLink
-            href={bookAssessmentHref}
-            variant="header"
-            className="hidden rounded-md px-5 py-2.5 lg:inline-flex"
-          >
-            BOOK FREE ASSESSMENT
-          </ButtonLink>
+          <div className="hidden lg:block">
+            <ButtonLink
+              href="#"
+              openAssessment
+              variant="header"
+              className="rounded-md px-5 py-2.5"
+            >
+              BOOK FREE ASSESSMENT
+            </ButtonLink>
+          </div>
           <button
             type="button"
             className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white text-[var(--color-primary)] shadow-sm transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] sm:size-11 lg:hidden"
@@ -150,120 +274,7 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {mobileOpen ? (
-          <motion.div
-            id="mobile-nav"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Mobile navigation"
-            className="fixed inset-0 z-[110] flex flex-col bg-white lg:hidden"
-            initial={reduceMotion ? false : { opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.28, ease: 'easeOut' }}
-          >
-            <div className="flex h-[4.25rem] shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 sm:h-[4.75rem] sm:px-6">
-              <BrandLogo showTagline={false} onClick={closeMobile} />
-              <button
-                type="button"
-                className="inline-flex size-10 items-center justify-center rounded-xl border border-[var(--color-border)] text-[var(--color-primary)] sm:size-11"
-                aria-label="Close menu"
-                onClick={closeMobile}
-              >
-                <HamburgerIcon open />
-              </button>
-            </div>
-
-            <nav aria-label="Mobile" className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-              <motion.ul
-                className="mx-auto flex max-w-lg flex-col gap-1"
-                initial={reduceMotion ? false : 'hidden'}
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: {
-                    transition: { staggerChildren: reduceMotion ? 0 : 0.05 },
-                  },
-                }}
-              >
-                {navLinks.map((link) => (
-                  <motion.li
-                    key={link.label}
-                    variants={{
-                      hidden: { opacity: 0, y: 10 },
-                      visible: { opacity: 1, y: 0 },
-                    }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                  >
-                    {link.children ? (
-                      <div>
-                        <button
-                          type="button"
-                          className="flex w-full items-center justify-between rounded-xl px-3 py-3.5 text-left text-base font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)]"
-                          aria-expanded={mobileCoursesOpen}
-                          onClick={() => setMobileCoursesOpen((v) => !v)}
-                        >
-                          {link.label}
-                          <ChevronDown
-                            className={cn(
-                              'size-4 transition-transform duration-300',
-                              mobileCoursesOpen && 'rotate-180',
-                            )}
-                            aria-hidden="true"
-                          />
-                        </button>
-                        <AnimatePresence initial={false}>
-                          {mobileCoursesOpen ? (
-                            <motion.ul
-                              className="mb-1 ml-2 overflow-hidden border-l-2 border-[var(--color-accent)]/40 pl-3"
-                              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.28, ease: 'easeInOut' }}
-                            >
-                              {link.children.map((child) => (
-                                <li key={child.href}>
-                                  <Link
-                                    href={child.href}
-                                    className="block rounded-lg px-2 py-2.5 text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-accent)]"
-                                    onClick={closeMobile}
-                                  >
-                                    {child.label}
-                                  </Link>
-                                </li>
-                              ))}
-                            </motion.ul>
-                          ) : null}
-                        </AnimatePresence>
-                      </div>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="block rounded-xl px-3 py-3.5 text-base font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-accent)]"
-                        onClick={closeMobile}
-                      >
-                        {link.label}
-                      </Link>
-                    )}
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </nav>
-
-            <div className="shrink-0 border-t border-[var(--color-border)] bg-white p-4 sm:p-6">
-              <ButtonLink
-                href={bookAssessmentHref}
-                variant="header"
-                className="w-full"
-                onClick={closeMobile}
-              >
-                BOOK FREE ASSESSMENT
-              </ButtonLink>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {mobileMenu}
     </header>
   );
 }

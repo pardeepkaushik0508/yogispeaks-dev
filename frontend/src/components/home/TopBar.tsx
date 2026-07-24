@@ -37,8 +37,8 @@ const icons = {
 export function TopBar() {
   return (
     <div className="bg-[var(--color-primary-dark)] text-[var(--color-on-dark-muted)]">
-      <div className="mx-auto flex max-w-[var(--container-width)] flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-sm sm:px-6">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <div className="mx-auto flex max-w-[var(--container-width)] flex-col items-center gap-3 px-4 py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
           <a
             href={siteContact.phoneHref}
             className="inline-flex items-center gap-2 transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
@@ -55,11 +55,11 @@ export function TopBar() {
           </a>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-center gap-3 sm:w-auto sm:justify-end">
           <span className="hidden text-xs font-medium tracking-wide text-white/70 sm:inline">
             Follow Us:
           </span>
-          <ul className="flex items-center gap-2.5 sm:gap-3">
+          <ul className="flex items-center justify-center gap-2.5 sm:gap-3">
             {socialLinks.map((link) => {
               const Icon = icons[link.icon];
               return (

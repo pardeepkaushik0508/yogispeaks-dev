@@ -23,7 +23,7 @@ export function SiteFooter() {
   return (
     <footer
       id="newsletter"
-      className="relative z-0 bg-[var(--color-primary-dark)] pt-[calc(80px+3.5rem)] text-[var(--color-on-dark-muted)] sm:pt-[calc(80px+4rem)]"
+      className="bg-[var(--color-primary-dark)] text-[var(--color-on-dark-muted)]"
     >
       <div className="mx-auto grid max-w-[var(--container-width)] gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">

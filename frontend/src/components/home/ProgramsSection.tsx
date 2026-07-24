@@ -92,7 +92,10 @@ export function ProgramsSection() {
                   href={homepageAnchors.programs}
                   className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                 >
-                  Know More <span aria-hidden="true">→</span>
+                  Know More{' '}
+                  <span aria-hidden="true" className="hidden sm:inline">
+                    →
+                  </span>
                 </Link>
               </MotionItem>
             );
