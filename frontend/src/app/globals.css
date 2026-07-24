@@ -4,8 +4,9 @@
 @theme inline {
   --color-background: var(--color-background);
   --color-foreground: var(--color-text);
-  --font-sans: var(--font-jakarta);
-  --font-heading: var(--font-montserrat);
+  --font-sans: var(--font-poppins);
+  --font-heading: var(--font-poppins);
+  --font-signature: var(--font-allura);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -22,5 +23,14 @@
 body {
   background: var(--color-background);
   color: var(--color-text);
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins), system-ui, sans-serif;
 }

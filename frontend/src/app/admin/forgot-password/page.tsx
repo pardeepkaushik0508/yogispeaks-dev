@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-6 w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-3 font-semibold text-[var(--color-primary-dark)]"
+              className="mt-6 w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-3 font-semibold text-white"
             >
               Send reset link
             </button>

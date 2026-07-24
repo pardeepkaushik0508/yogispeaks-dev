@@ -1,39 +1,33 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   Facebook,
   Instagram,
   Linkedin,
-  MessageCircle,
+  Mail,
+  Phone,
   Youtube,
 } from 'lucide-react';
-import { navLinks, programs, siteContact, socialLinks } from '@/data/homepage';
+import { BrandLogo } from '@/components/BrandLogo';
+import { WhatsAppIcon } from '@/components/home/WhatsAppButton';
+import { homepageAnchors, navLinks, programs, siteContact, socialLinks } from '@/data/homepage';
 
 const icons = {
   facebook: Facebook,
   instagram: Instagram,
   youtube: Youtube,
   linkedin: Linkedin,
-  whatsapp: MessageCircle,
+  whatsapp: WhatsAppIcon,
 };
 
 export function SiteFooter() {
   return (
-    <footer id="newsletter" className="bg-[var(--color-primary-dark)] text-[var(--color-on-dark-muted)]">
+    <footer
+      id="newsletter"
+      className="relative z-0 bg-[var(--color-primary-dark)] pt-[calc(80px+3.5rem)] text-[var(--color-on-dark-muted)] sm:pt-[calc(80px+4rem)]"
+    >
       <div className="mx-auto grid max-w-[var(--container-width)] gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-1">
-          <Link href="/" className="mb-4 inline-flex items-center gap-3">
-            <Image
-              src="/brand/logo-primary.png"
-              alt="YogiSpeaks"
-              width={48}
-              height={48}
-              className="size-12 rounded-full object-cover"
-            />
-            <span className="font-[family-name:var(--font-montserrat)] text-sm font-extrabold tracking-wide text-white">
-              YOGISPEAKS
-            </span>
-          </Link>
+          <BrandLogo inverted size="sm" className="mb-4" />
           <p className="mb-4 text-sm leading-relaxed">
             Professional communication coaching that builds fluency, confidence,
             and career-ready presence.
@@ -59,7 +53,7 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="mb-4 font-[family-name:var(--font-montserrat)] text-sm font-bold uppercase tracking-wider text-white">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
             Quick Links
           </h2>
           <ul className="space-y-2 text-sm">
@@ -74,14 +68,14 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="mb-4 font-[family-name:var(--font-montserrat)] text-sm font-bold uppercase tracking-wider text-white">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
             Our Programs
           </h2>
           <ul className="space-y-2 text-sm">
             {programs.map((program) => (
               <li key={program.slug}>
                 <Link
-                  href={`/courses/${program.slug}`}
+                  href={homepageAnchors.programs}
                   className="hover:text-[var(--color-accent)]"
                 >
                   {program.title}
@@ -92,18 +86,26 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="mb-4 font-[family-name:var(--font-montserrat)] text-sm font-bold uppercase tracking-wider text-white">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
             Contact Us
           </h2>
           <ul className="space-y-2 text-sm">
             <li>{siteContact.address}</li>
             <li>
-              <a href={siteContact.emailHref} className="hover:text-[var(--color-accent)]">
+              <a
+                href={siteContact.emailHref}
+                className="inline-flex items-center gap-2 hover:text-[var(--color-accent)]"
+              >
+                <Mail className="size-3.5 text-[var(--color-accent)]" aria-hidden="true" />
                 {siteContact.email}
               </a>
             </li>
             <li>
-              <a href={siteContact.phoneHref} className="hover:text-[var(--color-accent)]">
+              <a
+                href={siteContact.phoneHref}
+                className="inline-flex items-center gap-2 hover:text-[var(--color-accent)]"
+              >
+                <Phone className="size-3.5 text-[var(--color-accent)]" aria-hidden="true" />
                 {siteContact.phone}
               </a>
             </li>
@@ -112,7 +114,7 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="mb-4 font-[family-name:var(--font-montserrat)] text-sm font-bold uppercase tracking-wider text-white">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
             Stay Connected
           </h2>
           <p className="mb-3 text-sm">
@@ -132,7 +134,7 @@ export function SiteFooter() {
             />
             <button
               type="submit"
-              className="rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              className="rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             >
               Subscribe
             </button>
@@ -144,12 +146,20 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-[var(--container-width)] flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs sm:px-6">
           <p>&copy; {new Date().getFullYear()} YogiSpeaks. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-[var(--color-accent)]">
+            <span
+              className="hover:text-[var(--color-accent)]"
+              aria-disabled="true"
+              title="Coming soon"
+            >
               Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-[var(--color-accent)]">
+            </span>
+            <span
+              className="hover:text-[var(--color-accent)]"
+              aria-disabled="true"
+              title="Coming soon"
+            >
               Terms
-            </Link>
+            </span>
           </div>
         </div>
       </div>

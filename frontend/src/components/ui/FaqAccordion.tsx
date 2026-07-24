@@ -11,24 +11,24 @@ export function FaqAccordion({ items }: { items: Item[] }) {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <div className="divide-y divide-[var(--color-border)]">
+    <div className="w-full min-w-0 divide-y divide-[var(--color-border)]">
       {items.map((item, index) => {
         const isOpen = openIndex === index;
         const panelId = `${baseId}-panel-${index}`;
         const buttonId = `${baseId}-button-${index}`;
 
         return (
-          <div key={item.question}>
+          <div key={item.question} className="min-w-0">
             <h3>
               <button
                 id={buttonId}
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={panelId}
-                className="flex w-full items-center justify-between gap-4 py-4 text-left text-sm font-semibold text-[var(--color-text)] transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                className="flex w-full min-w-0 items-center justify-between gap-3 py-4 text-left text-sm font-semibold text-[var(--color-text)] transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                 onClick={() => setOpenIndex(isOpen ? -1 : index)}
               >
-                <span>{item.question}</span>
+                <span className="min-w-0 flex-1 break-words">{item.question}</span>
                 <ChevronDown
                   aria-hidden="true"
                   className={cn(
@@ -43,7 +43,7 @@ export function FaqAccordion({ items }: { items: Item[] }) {
               role="region"
               aria-labelledby={buttonId}
               hidden={!isOpen}
-              className="pb-4 text-sm leading-relaxed text-[var(--color-muted)]"
+              className="min-w-0 break-words pb-4 text-sm leading-relaxed text-[var(--color-muted)]"
             >
               {isOpen ? item.answer : null}
             </div>
