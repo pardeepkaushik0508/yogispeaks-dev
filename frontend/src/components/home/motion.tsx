@@ -13,12 +13,12 @@ export const fadeIn: Variants = {
 };
 
 export const fadeLeft: Variants = {
-  hidden: { opacity: 0, x: -24 },
+  hidden: { opacity: 0, x: -12 },
   visible: { opacity: 1, x: 0 },
 };
 
 export const fadeRight: Variants = {
-  hidden: { opacity: 0, x: 24 },
+  hidden: { opacity: 0, x: 12 },
   visible: { opacity: 1, x: 0 },
 };
 

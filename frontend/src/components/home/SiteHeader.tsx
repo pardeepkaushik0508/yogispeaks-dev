@@ -77,9 +77,9 @@ export function SiteHeader() {
             aria-modal="true"
             aria-label="Mobile navigation"
             className="fixed inset-0 z-[180] flex flex-col bg-white lg:hidden"
-            initial={reduceMotion ? false : { x: '100%', opacity: 0.6 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '100%', opacity: 0.6 }}
+            initial={reduceMotion ? false : { x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 34 }}
           >
               <div className="flex h-[4.25rem] shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 sm:h-[4.75rem] sm:px-6">
@@ -188,7 +188,7 @@ export function SiteHeader() {
     );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 max-w-full overflow-x-hidden border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-[4.25rem] max-w-[var(--container-width)] items-center justify-between gap-3 px-4 sm:h-[4.75rem] sm:gap-4 sm:px-6">
         <div className="min-w-0 flex-1 overflow-hidden lg:flex-none">
           <BrandLogo

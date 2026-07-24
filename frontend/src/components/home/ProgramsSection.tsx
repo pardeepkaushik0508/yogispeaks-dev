@@ -33,7 +33,7 @@ export function ProgramsSection() {
     <section
       id="programs"
       aria-labelledby="programs-heading"
-      className="bg-[var(--color-surface)] py-16 sm:py-20"
+      className="overflow-x-hidden bg-[var(--color-surface)] py-16 sm:py-20"
     >
       <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
         <MotionReveal className="mb-10 text-center">

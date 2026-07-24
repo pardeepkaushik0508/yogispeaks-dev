@@ -36,9 +36,9 @@ const icons = {
 
 export function TopBar() {
   return (
-    <div className="bg-[var(--color-primary-dark)] text-[var(--color-on-dark-muted)]">
+    <div className="max-w-full overflow-x-hidden bg-[var(--color-primary-dark)] text-[var(--color-on-dark-muted)]">
       <div className="mx-auto flex max-w-[var(--container-width)] flex-col items-center gap-3 px-4 py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6">
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
+        <div className="flex max-w-full flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
           <a
             href={siteContact.phoneHref}
             className="inline-flex items-center gap-2 transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"

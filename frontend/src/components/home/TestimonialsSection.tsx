@@ -38,7 +38,7 @@ export function TestimonialsSection() {
     <section
       id="testimonials"
       aria-labelledby="testimonials-heading"
-      className="bg-[var(--color-primary)] py-16 text-[var(--color-on-dark)] sm:py-20"
+      className="overflow-x-hidden bg-[var(--color-primary)] py-16 text-[var(--color-on-dark)] sm:py-20"
     >
       <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
         <MotionReveal className="mb-8 text-center sm:mb-10">

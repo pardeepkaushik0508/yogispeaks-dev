@@ -14,9 +14,9 @@ export function BottomCtaSection() {
       <div className="mx-auto w-full max-w-[var(--container-width)] px-[15px] sm:px-6">
         <MotionReveal
           variants={scaleIn}
-          className="rounded-2xl bg-[var(--color-primary-dark)] px-[15px] py-7 text-[var(--color-on-dark)] sm:px-8 sm:py-9 lg:px-10 lg:py-10"
+          className="rounded-2xl bg-[var(--color-primary-dark)] px-[15px] py-7 text-[var(--color-on-dark)] sm:px-8 sm:py-9 lg:px-10 lg:py-10 overflow-hidden"
         >
-          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:gap-0">
+          <div className="grid max-w-full items-center gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:gap-0">
             {/* Heading */}
             <div className="min-w-0 text-center lg:pr-8 lg:text-left xl:pr-10">
               <h2

@@ -33,7 +33,7 @@ export function JourneyBenefitsSection() {
   return (
     <section
       aria-labelledby="journey-heading"
-      className="bg-white py-16 sm:py-20"
+      className="overflow-x-hidden bg-white py-16 sm:py-20"
     >
       <div className="mx-auto grid max-w-[var(--container-width)] gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.85fr)] lg:gap-12 xl:gap-16">
         <div>

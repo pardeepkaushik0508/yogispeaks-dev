@@ -40,7 +40,7 @@ export function FeaturesFaqSection() {
   return (
     <section
       aria-labelledby="features-heading"
-      className="bg-white py-14 sm:py-16 lg:py-20"
+      className="overflow-x-hidden bg-white py-14 sm:py-16 lg:py-20"
     >
       <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
         {/* Features column (heading + 6 boxes) | FAQ column */}
