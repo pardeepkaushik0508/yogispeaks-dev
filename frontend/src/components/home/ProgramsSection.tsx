@@ -10,7 +10,7 @@ import {
   MessageCircle,
   Sparkles,
 } from 'lucide-react';
-import { homepageAnchors, programs } from '@/data/homepage';
+import { programs } from '@/data/homepage';
 import {
   fadeUp,
   MotionItem,
@@ -89,7 +89,11 @@ export function ProgramsSection() {
                   {program.description}
                 </p>
                 <Link
-                  href={homepageAnchors.programs}
+                  href={
+                    program.slug === 'spoken-english'
+                      ? `/courses/${program.slug}`
+                      : `/courses`
+                  }
                   className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                 >
                   Know More{' '}

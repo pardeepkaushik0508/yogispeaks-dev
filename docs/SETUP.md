@@ -1,6 +1,6 @@
 # YogiSpeaks — Setup & Run Guide
 
-Complete guide to run the project **with Docker** or **without Docker** (local Node + PostgreSQL).
+Complete guide to run the project with local Node.js and PostgreSQL.
 
 > Communication coaching CMS — not a travel product.
 
@@ -16,7 +16,6 @@ Complete guide to run the project **with Docker** or **without Docker** (local N
 | Backend (NestJS) | `4000` | REST API + Swagger + `/uploads` |
 | PostgreSQL 16+ | `5432` | Primary database |
 | Redis 7 | `6379` | Optional (health stub skips if unset) |
-| Nginx (Docker only) | `80` | Reverse proxy to frontend + API |
 
 | URL | Path |
 |-----|------|
@@ -25,27 +24,17 @@ Complete guide to run the project **with Docker** or **without Docker** (local N
 | API | http://localhost:4000/api/v1 |
 | Swagger | http://localhost:4000/api/docs |
 | Health | http://localhost:4000/api/v1/health |
-| Via Nginx (Docker) | http://localhost/ and http://localhost/api/ |
 
 ---
 
 ## Prerequisites
 
-### Both paths
-
 - Git
-- Copy env templates — **never commit real `.env` files**
-
-### Without Docker
-
 - [Node.js 22+](https://nodejs.org/) (LTS)
 - [pnpm 10](https://pnpm.io/) — `corepack enable && corepack prepare pnpm@10 --activate`
 - [PostgreSQL 16+](https://www.postgresql.org/download/) running locally
 - Redis optional
-
-### With Docker
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) or Docker Engine + Compose plugin (Linux)
+- Copy env templates — **never commit real `.env` files**
 
 ---
 
@@ -62,7 +51,7 @@ cp frontend/.env.example frontend/.env.local
 
 | File | Used by |
 |------|---------|
-| `.env` | Docker Compose + shared defaults |
+| `.env` | Shared defaults (optional reference) |
 | `backend/.env` | NestJS when you run backend with pnpm |
 | `frontend/.env.local` | Next.js (`NEXT_PUBLIC_*`) |
 
@@ -86,7 +75,7 @@ Windows tip: prefer `127.0.0.1` over `localhost` if Postgres auth fails oddly.
 
 ---
 
-## Option A — Without Docker (recommended for daily development)
+## Install & run
 
 ### 1. Install PostgreSQL
 
@@ -145,7 +134,7 @@ pnpm dev
 1. Open http://localhost:3000/admin/login  
 2. Use `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` from `backend/.env`
 
-### Useful commands (no Docker)
+### Useful commands
 
 ```bash
 cd backend
@@ -169,105 +158,6 @@ pnpm build                  # production build check
 
 ---
 
-## Option B — With Docker (full stack)
-
-Compose starts: **Postgres + Redis + Backend + Frontend + Nginx**.
-
-### 1. Configure root `.env`
-
-```bash
-cp .env.example .env
-```
-
-Edit at least:
-
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (≥ 32 chars)
-- `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD` (≥ 12 chars)
-- `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
-- `NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1`  
-  (or `http://localhost/api/v1` if the browser only talks through Nginx — keep CORS/FRONTEND_URL aligned)
-
-Compose overrides DB/Redis hostnames inside the network:
-
-- DB host → `postgres`
-- Redis host → `redis`
-
-You do **not** need local Node/Postgres installed for this path.
-
-### 2. Build and start
-
-```bash
-# From repo root
-docker compose up --build
-```
-
-Detached:
-
-```bash
-docker compose up --build -d
-```
-
-### 3. Run migrations + seed inside the backend container
-
-Images start the API process; apply schema once after Postgres is healthy:
-
-```bash
-docker compose exec backend pnpm exec prisma migrate deploy
-docker compose exec backend pnpm exec prisma db seed
-```
-
-Seed needs `SUPER_ADMIN_*` (and the rest of backend env) from the compose `.env` / container environment.
-
-### 4. Open the apps
-
-| Entry | URL |
-|-------|-----|
-| Nginx (preferred) | http://localhost |
-| Frontend direct | http://localhost:3000 |
-| Backend direct | http://localhost:4000/api/v1 |
-| Admin | http://localhost:3000/admin/login |
-
-### 5. Stop / reset
-
-```bash
-docker compose down          # stop containers, keep DB volume
-docker compose down -v       # also delete postgres_data (wipes DB)
-```
-
-### Uploads (Docker)
-
-- `backend/uploads` is mounted as a named/bind volume so files survive container rebuilds
-- Nginx proxies `/uploads/` to the backend
-- Still gitignored on the host if you bind-mount a local folder
-
-### Hybrid: Docker only for DB (+ Redis)
-
-Useful when you want local hot-reload with pnpm:
-
-```bash
-docker compose up postgres redis -d
-```
-
-Then point `backend/.env`:
-
-```text
-DATABASE_URL=postgresql://yogispeaks:YOUR_PASSWORD@127.0.0.1:5432/yogispeaks?schema=public
-REDIS_URL=redis://127.0.0.1:6379
-```
-
-Expose Postgres/Redis ports if your compose file does not publish them — add under `postgres` / `redis`:
-
-```yaml
-ports:
-  - "5432:5432"   # postgres
-  - "6379:6379"   # redis
-```
-
-Then run backend/frontend with **Option A** steps 2–4.
-
----
-
 ## Verify everything works
 
 1. Health: `GET http://localhost:4000/api/v1/health` → ok  
@@ -286,9 +176,7 @@ Then run backend/frontend with **Option A** steps 2–4.
 | CORS / login cookie issues | `CORS_ORIGINS` and `FRONTEND_URL` must match the browser origin (`http://localhost:3000`) |
 | Backend env validation fails | JWT secrets ≥ 32 chars; admin password ≥ 12; `COOKIE_SECURE` is `"true"` or `"false"` string |
 | Admin 401 after restart | Re-seed or reset password; check you’re hitting the same API as `NEXT_PUBLIC_API_URL` |
-| Docker backend unhealthy | Wait for Postgres healthcheck; check `docker compose logs backend` |
-| Uploads 404 behind Nginx | Ensure `/uploads/` is proxied to backend (see `infra/nginx/default.conf`) |
-| Port already in use | Stop other apps on 3000/4000/5432 or change ports in compose / `.env` |
+| Port already in use | Stop other apps on 3000/4000/5432 or change ports in `.env` |
 | pnpm not found | `corepack enable` then `corepack prepare pnpm@10 --activate` |
 
 ---
@@ -297,7 +185,7 @@ Then run backend/frontend with **Option A** steps 2–4.
 
 - Set `NODE_ENV=production`, strong secrets, `COOKIE_SECURE=true`, HTTPS.
 - Prefer **Cloudinary or S3** (`MEDIA_PROVIDER`) over local disk when you scale past one server.
-- Run `prisma migrate deploy` in CI/CD or container entrypoint before serving traffic.
+- Run `prisma migrate deploy` in CI/CD before serving traffic.
 - Do not commit `.env`, `uploads/`, or `node_modules/`.
 
 ---

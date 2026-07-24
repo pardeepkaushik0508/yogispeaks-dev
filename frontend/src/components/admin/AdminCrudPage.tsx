@@ -26,6 +26,7 @@ export function AdminCrudPage({
   fields,
   mapRow,
   transformCreate,
+  editHref,
 }: {
   title: string;
   permission: string;
@@ -34,6 +35,8 @@ export function AdminCrudPage({
   fields: CrudField[];
   mapRow?: (raw: unknown) => Row[];
   transformCreate?: (form: Record<string, string>) => Record<string, unknown>;
+  /** When set, shows an Edit link to this path pattern with `:id` replaced. */
+  editHref?: (row: Row) => string;
 }) {
   const { get, mutate } = useAdminApi();
   const { push } = useToast();
@@ -125,13 +128,20 @@ export function AdminCrudPage({
                 key: 'actions',
                 header: '',
                 render: (row) => (
-                  <button
-                    type="button"
-                    className="text-sm text-red-600"
-                    onClick={() => setDeleteId(row.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center justify-end gap-3">
+                    {editHref ? (
+                      <a href={editHref(row)} className="text-sm font-medium text-slate-900">
+                        Edit
+                      </a>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="text-sm text-red-600"
+                      onClick={() => setDeleteId(row.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 ),
               },
             ]}

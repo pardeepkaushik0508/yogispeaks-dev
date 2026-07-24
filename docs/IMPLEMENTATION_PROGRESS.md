@@ -5,7 +5,7 @@ Living checklist. Update at the end of each phase.
 | Phase | Name | Status | Notes |
 |-------|------|--------|-------|
 | 1 | Analysis & planning | **Complete** | Plans written; travel scope excluded |
-| 2 | Project setup | **Complete** | Next.js 16.2.11 + NestJS 11 + Docker files + env validation |
+| 2 | Project setup | **Complete** | Next.js 16.2.11 + NestJS 11 + env validation |
 | 3 | Backend foundation | **Complete** | Prisma migrate + seed + Auth/RBAC + health |
 | 4 | Content APIs | **Complete** | Admin + public CMS endpoints under `/api/v1` |
 | 5 | Admin dashboard | **Complete** | AdminShell + all CMS module screens |

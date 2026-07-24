@@ -8,7 +8,7 @@ export const siteContact = {
   hours: 'Mon–Sat · 10:00 AM – 7:00 PM IST',
 };
 
-/** In-page anchors and external CTAs used while inner pages are not live yet. */
+/** In-page anchors for homepage sections; inner marketing routes are live. */
 export const homepageAnchors = {
   programs: '/#programs',
   testimonials: '/#testimonials',
@@ -31,16 +31,16 @@ export const socialLinks = [
 
 export const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: homepageAnchors.features },
+  { label: 'About', href: '/about' },
   {
     label: 'Courses',
-    href: homepageAnchors.programs,
+    href: '/courses',
     children: [
-      { label: 'Spoken English', href: homepageAnchors.programs },
-      { label: 'IELTS Preparation', href: homepageAnchors.programs },
-      { label: 'Professional Communication', href: homepageAnchors.programs },
-      { label: 'Personality Development', href: homepageAnchors.programs },
-      { label: 'Spoken Hindi', href: homepageAnchors.programs },
+      { label: 'Spoken English', href: '/courses/spoken-english' },
+      { label: 'IELTS Preparation', href: '/courses' },
+      { label: 'Professional Communication', href: '/courses' },
+      { label: 'Personality Development', href: '/courses' },
+      { label: 'Spoken Hindi', href: '/courses' },
     ],
   },
   { label: 'Reviews', href: homepageAnchors.testimonials },

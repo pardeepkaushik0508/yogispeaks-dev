@@ -230,13 +230,21 @@ Heading, description, success/error copy — also used in footer “Stay Connect
 | Field | TinyMCE? |
 |-------|----------|
 | title, slug | No |
-| body | **Yes** |
+| body | **Yes** (fallback / legal) |
+| blocks (`PageBlock`) | Structured sections — About Us hero, story, mission, vision, values, methodology, CTA, etc. |
 | heroImage | Media |
 | SEO | No |
 | status | DRAFT / PUBLISHED |
 
+**About Us** uses slug `about` with `PageBlock` keys: `hero`, `story`, `mission`, `vision`, `values`, `why_choose`, `methodology`, `who_can_join`, `differentiators`, `commitment`, `cta`.
+
 Legal slugs: `privacy-policy`, `terms-and-conditions`, `refund-policy`, `disclaimer`.
 
+### Course detail extras (Spoken English, etc.)
+
+In addition to core Course fields: `heroHeadline`, `whyLearnHtml`, `whyChooseHtml`, `secondaryCta*`, `CourseFeature`, `CourseLearningStep`, `CourseCurriculumItem`, `CourseBenefit`, and course-scoped `Faq` (`courseId`).
+
+Spoken English slug: `spoken-english`.
 ---
 
 ## 9. Enquiries (assessment + contact)

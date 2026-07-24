@@ -21,6 +21,8 @@ type AuthContextValue = {
   user: AdminUser | null;
   loading: boolean;
   refreshUser: () => Promise<void>;
+  /** Persist access token + user after a successful /auth/login. */
+  completeLogin: (accessToken: string, user: AdminUser) => void;
   logout: () => Promise<void>;
 };
 
@@ -94,6 +96,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading, user, pathname, router]);
 
+  const completeLogin = useCallback((accessToken: string, nextUser: AdminUser) => {
+    setAccessToken(accessToken);
+    setUser(nextUser);
+    setLoading(false);
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await apiFetch('/auth/logout', { method: 'POST' });
@@ -106,8 +114,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const value = useMemo(
-    () => ({ user, loading, refreshUser, logout }),
-    [user, loading, refreshUser, logout],
+    () => ({ user, loading, refreshUser, completeLogin, logout }),
+    [user, loading, refreshUser, completeLogin, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

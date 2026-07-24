@@ -8,6 +8,7 @@ export default function PagesAdminPage() {
       title="Pages"
       permission="pages.manage"
       endpoint="/admin/pages"
+      editHref={(row) => `/admin/pages/${row.id}`}
       fields={[
         { name: 'title', label: 'Title', required: true },
         { name: 'slug', label: 'Slug' },

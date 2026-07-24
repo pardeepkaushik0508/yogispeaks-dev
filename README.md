@@ -6,10 +6,9 @@ Communication coaching platform — public marketing site, course pages, and adm
 
 ## Quick start
 
-Full instructions (with Docker **and** without Docker): **[docs/SETUP.md](docs/SETUP.md)**
+Full instructions: **[docs/SETUP.md](docs/SETUP.md)**
 
 ```bash
-# Without Docker (dev)
 cp .env.example .env
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
@@ -17,14 +16,6 @@ cp frontend/.env.example frontend/.env.local
 cd backend && pnpm install && pnpm exec prisma migrate deploy && pnpm exec prisma db seed && pnpm start:dev
 # Other terminal:
 cd frontend && pnpm install && pnpm dev
-```
-
-```bash
-# With Docker
-cp .env.example .env   # set strong passwords + JWT secrets
-docker compose up --build
-docker compose exec backend pnpm exec prisma migrate deploy
-docker compose exec backend pnpm exec prisma db seed
 ```
 
 | App | URL |
@@ -38,8 +29,8 @@ Admin user comes from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (seed).
 
 ## Prerequisites
 
-- Node.js **22+** and [pnpm 10](https://pnpm.io/) — *or* Docker Desktop
-- PostgreSQL **16+** (bundled in Docker Compose)
+- Node.js **22+** and [pnpm 10](https://pnpm.io/)
+- PostgreSQL **16+** running locally
 
 ## Security (GitHub)
 
@@ -65,7 +56,7 @@ git push -u origin main
 
 ## Documentation
 
-- **[docs/SETUP.md](docs/SETUP.md)** — install & run (Docker / no Docker)
+- **[docs/SETUP.md](docs/SETUP.md)** — install & run
 - [docs/YogiSpeaks-Setup-Guide.docx](docs/YogiSpeaks-Setup-Guide.docx) / [docs/YogiSpeaks-Setup-Guide.pdf](docs/YogiSpeaks-Setup-Guide.pdf)
 - [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)
 - [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md)

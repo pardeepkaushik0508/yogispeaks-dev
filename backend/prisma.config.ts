@@ -28,13 +28,12 @@ loadEnv({
 });
 
 /**
- * During Docker image build, DATABASE_URL may not be available.
- *
  * `prisma generate` does not need a live database connection,
  * so an empty fallback allows client generation to complete.
  *
- * During migrations and application runtime, Render provides
- * the real DATABASE_URL through environment variables.
+ * During migrations and application runtime, the host environment
+ * provides the real DATABASE_URL (for example via backend/.env or
+ * the deployment platform).
  */
 const databaseUrl = process.env.DATABASE_URL ?? '';
 
