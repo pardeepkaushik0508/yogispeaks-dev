@@ -69,7 +69,7 @@ All placeholders are **MediaAsset** rows replaceable from `/admin/media` without
 
 | Service | Purpose | Blocks? |
 |---------|---------|---------|
-| PostgreSQL | Data | Local Docker for dev |
+| PostgreSQL | Data | Local install for dev |
 | Redis | Throttle/cache | Optional — degrade gracefully |
 | SMTP | Password reset + enquiry emails | Dev can log emails to console |
 | Cloudinary / S3 | Media | Local disk in development |

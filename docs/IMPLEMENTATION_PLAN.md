@@ -13,7 +13,7 @@
 | `reference/homepage-reference.jpg` | Primary visual reference | Section order, spacing, typography, CTA styling, cards, dark/light bands |
 | `reference/homepage-annotated-reference.jpg` | CTA identification only | Green circles mark CTAs — **not** part of the final UI |
 | `reference/logo-primary.png` | Brand identity | Navy / gold / white circular YS emblem; favicon candidate = YS monogram |
-| `docs/yogispeaks-technical-requirements.pdf` | Tech & delivery requirements | Next.js + NestJS + PostgreSQL + Prisma + Docker + custom admin CMS |
+| `docs/yogispeaks-technical-requirements.pdf` | Tech & delivery requirements | Next.js + NestJS + PostgreSQL + Prisma + custom admin CMS |
 | `docs/content-required.pdf` | Client content checklist | Lists content the client must supply; used to define seed placeholders |
 | `docs/best-technology-stack.pdf` | Stack note (mixed domain) | **Travel / Thomas Cook package features are explicitly excluded** (see §11) |
 
@@ -29,10 +29,8 @@ Two independently deployable apps under one monorepo:
 yogispeaks/
 ├── frontend/          # Next.js App Router — public site + admin UI
 ├── backend/           # NestJS REST API — /api/v1 — Prisma + PostgreSQL
-├── infra/             # Nginx, deploy helpers
 ├── docs/              # Architecture, API, admin, security, deployment
 ├── reference/         # Design references (not served as page content)
-├── docker-compose.yml
 ├── .env.example
 └── README.md
 ```
@@ -45,7 +43,6 @@ yogispeaks/
 | **Backend** | Auth, RBAC, CMS CRUD, media, inquiries, emails, sanitization, rate limits | Rendering HTML pages |
 | **PostgreSQL** | Persistent content, users, sessions, audit | — |
 | **Redis (optional)** | Throttling / cache readiness | Required for MVP local dev (graceful without) |
-| **Nginx** | Reverse proxy, TLS termination, static routing | App logic |
 
 ### High-level request flow
 
@@ -209,7 +206,7 @@ Details: `docs/CONTENT_MODEL.md`.
 |------|--------|
 | Frontend | Next.js 16 stable (or newest mutually compatible stable), React 19, TypeScript strict, Tailwind CSS 4, Framer Motion, RHF, Zod, TanStack Query, TinyMCE React, dnd-kit, Playwright |
 | Backend | Node.js Active LTS, NestJS stable, Prisma, PostgreSQL, Passport JWT, Argon2, Helmet, rate limit, sanitize-html, Nodemailer, Cloudinary/S3 |
-| Tooling | pnpm, Docker Compose, Nginx, ESLint, Prettier, Vitest/Jest + Playwright |
+| Tooling | pnpm, ESLint, Prettier, Vitest/Jest + Playwright |
 
 Exact pinned versions will be recorded in `docs/TECHNOLOGY_DECISIONS.md` during Phase 2 after registry checks. **No canary / beta / RC.**
 
@@ -220,7 +217,7 @@ Exact pinned versions will be recorded in `docs/TECHNOLOGY_DECISIONS.md` during 
 | Phase | Scope | Exit criteria |
 |-------|-------|---------------|
 | **1 — Analysis** *(current)* | Read sources; write plans | Six planning docs + progress tracker |
-| **2 — Project setup** | Scaffold frontend/backend, lint, env validation, Docker skeleton | Apps install; typecheck/lint configs work |
+| **2 — Project setup** | Scaffold frontend/backend, lint, env validation | Apps install; typecheck/lint configs work |
 | **3 — Backend foundation** | Prisma schema, migrations, seed, auth/RBAC, password reset, Swagger | Login + reset + seed admin work |
 | **4 — Content APIs** | All CMS + public + inquiry + media + email | Swagger-complete CRUD + public reads |
 | **5 — Admin dashboard** | All admin routes, TinyMCE, media picker, RBAC UI | Content editable without code |
@@ -248,7 +245,7 @@ Excluded concepts include:
 
 **Included instead:** coaching courses, assessment/contact lead capture, blogs, testimonials, FAQs, newsletter, and full CMS for the communication brand.
 
-Useful stack ideas **kept** from that PDF where they apply to coaching: NestJS, PostgreSQL, Prisma, Redis-ready caching, Docker/Nginx, JWT, Cloudinary/S3 for **media** (not “package images”).
+Useful stack ideas **kept** from that PDF where they apply to coaching: NestJS, PostgreSQL, Prisma, Redis-ready caching, JWT, Cloudinary/S3 for **media** (not “package images”).
 
 ---
 
@@ -267,4 +264,4 @@ Useful stack ideas **kept** from that PDF where they apply to coaching: NestJS, 
 
 ## 13. Next step
 
-**Await approval of Phase 1 plans**, then begin **Phase 2 — Project setup** (scaffold apps, pin packages, Docker, env validation). No frontend/backend feature code until Phase 1 is accepted.
+**Await approval of Phase 1 plans**, then begin **Phase 2 — Project setup** (scaffold apps, pin packages, env validation). No frontend/backend feature code until Phase 1 is accepted.

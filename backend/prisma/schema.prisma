@@ -411,6 +411,11 @@ model Course {
   feeDisplayEnabled  Boolean       @default(false)
   eligibilityHtml    String?       @db.Text
   whoShouldJoinHtml  String?       @db.Text
+  whyLearnHtml       String?       @db.Text
+  whyChooseHtml      String?       @db.Text
+  heroHeadline       String?
+  secondaryCtaLabel  String?
+  secondaryCtaHref   String?
   ctaLabel           String?
   ctaHref            String?
   metaTitle          String?
@@ -434,8 +439,11 @@ model Course {
   ogImage       MediaAsset? @relation("CourseOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
 
   benefits         CourseBenefit[]
+  features         CourseFeature[]
+  learningSteps    CourseLearningStep[]
   curriculumItems  CourseCurriculumItem[]
   galleryItems     CourseGalleryItem[]
+  faqs             Faq[]
   inquiries        Inquiry[]
 
   @@index([status])
@@ -457,6 +465,38 @@ model CourseBenefit {
 
   @@index([courseId, sortOrder])
   @@map("course_benefits")
+}
+
+model CourseFeature {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @db.Uuid
+  title       String
+  description String?  @db.Text
+  iconKey     String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, sortOrder])
+  @@map("course_features")
+}
+
+model CourseLearningStep {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @db.Uuid
+  stepNumber  Int
+  title       String
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, sortOrder])
+  @@map("course_learning_steps")
 }
 
 model CourseCurriculumItem {
@@ -522,6 +562,7 @@ model Faq {
   question        String
   answerHtml      String   @db.Text
   category        String?
+  courseId        String?  @db.Uuid
   showOnHomepage  Boolean  @default(false)
   isVisible       Boolean  @default(true)
   sortOrder       Int      @default(0)
@@ -531,8 +572,11 @@ model Faq {
   updatedById     String?  @db.Uuid
   deletedAt       DateTime?
 
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
   @@index([isVisible, sortOrder])
   @@index([showOnHomepage])
+  @@index([courseId])
   @@index([deletedAt])
   @@map("faqs")
 }
@@ -562,10 +606,34 @@ model Page {
 
   heroImage MediaAsset? @relation("PageHeroImage", fields: [heroImageId], references: [id], onDelete: SetNull)
   ogImage   MediaAsset? @relation("PageOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+  blocks    PageBlock[]
 
   @@index([status])
   @@index([deletedAt])
   @@map("pages")
+}
+
+/// Structured marketing-page sections (About, Contact intro, etc.) — fully admin-editable.
+model PageBlock {
+  id        String   @id @default(uuid()) @db.Uuid
+  pageId    String   @db.Uuid
+  /// e.g. hero | story | mission | vision | values | why_choose | methodology | who_can_join | differentiators | commitment | cta
+  key       String
+  title     String?
+  subtitle  String?
+  bodyHtml  String?  @db.Text
+  /// List items: [{ title, description? }] or plain strings
+  itemsJson Json?
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, key])
+  @@index([pageId, sortOrder])
+  @@map("page_blocks")
 }
 
 model BlogCategory {

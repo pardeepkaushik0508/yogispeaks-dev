@@ -8,6 +8,19 @@ export const siteContact = {
   hours: 'Mon–Sat · 10:00 AM – 7:00 PM IST',
 };
 
+/** In-page anchors for homepage sections; inner marketing routes are live. */
+export const homepageAnchors = {
+  programs: '/#programs',
+  testimonials: '/#testimonials',
+  features: '/#features-heading',
+  faq: '/#faq',
+  newsletter: '/#newsletter',
+};
+
+export const bookAssessmentHref = `${siteContact.whatsapp}?text=${encodeURIComponent(
+  'Hi, I would like to book a free communication assessment.',
+)}`;
+
 export const socialLinks = [
   { label: 'Facebook', href: 'https://facebook.com', icon: 'facebook' as const },
   { label: 'Instagram', href: 'https://instagram.com', icon: 'instagram' as const },
@@ -24,34 +37,36 @@ export const navLinks = [
     href: '/courses',
     children: [
       { label: 'Spoken English', href: '/courses/spoken-english' },
-      { label: 'IELTS Preparation', href: '/courses/ielts-preparation' },
-      { label: 'Professional Communication', href: '/courses/professional-communication' },
-      { label: 'Personality Development', href: '/courses/personality-development' },
-      { label: 'Spoken Hindi', href: '/courses/spoken-hindi' },
+      { label: 'IELTS Preparation', href: '/courses' },
+      { label: 'Professional Communication', href: '/courses' },
+      { label: 'Personality Development', href: '/courses' },
+      { label: 'Spoken Hindi', href: '/courses' },
     ],
   },
-  { label: 'Reviews', href: '/#testimonials' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Contact', href: '/contact' },
+  { label: 'Reviews', href: homepageAnchors.testimonials },
+  { label: 'Blog', href: homepageAnchors.newsletter },
+  { label: 'Contact', href: siteContact.whatsapp },
 ];
 
 export const heroContent = {
   eyebrow: 'Helping Students & Professionals',
   heading: 'Transform the Way You Communicate. Build Confidence. Advance Your Career.',
-  highlightPhrases: ['Build Confidence.', 'Advance Your Career.'],
+  highlightPhrases: ['Build Confidence.'],
   description:
     'Personalized one-to-one coaching to help you speak fluently, communicate effectively, and unlock better opportunities.',
   primaryCta: {
     label: 'Book Your Free Communication Assessment',
-    href: '/free-assessment',
+    href: bookAssessmentHref,
   },
   secondaryCta: {
     label: 'Explore Our Programs',
-    href: '/courses',
+    href: homepageAnchors.programs,
   },
   founderQuote:
     "Communication is not just a skill, it's your competitive advantage.",
-  founderAttribution: 'Yoginder, Coach & Founder',
+  founderName: 'Yogender',
+  founderRole: 'Coach & Founder',
+  founderAttribution: 'Yogender, Coach & Founder, YogiSpeaks',
 };
 
 export const stats = [
@@ -191,6 +206,8 @@ export const testimonials = [
     review:
       'My interviews finally feel natural. The coaching is practical, personal, and results-driven.',
     rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&h=160&q=80',
   },
   {
     name: 'Rahul Mehta',
@@ -198,6 +215,8 @@ export const testimonials = [
     review:
       'From hesitant answers to confident delivery — YogiSpeaks changed how I present myself.',
     rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&h=160&q=80',
   },
   {
     name: 'Ananya Gupta',
@@ -205,6 +224,8 @@ export const testimonials = [
     review:
       'The one-to-one format meant every session targeted my weak spots. Highly recommend.',
     rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=160&h=160&q=80',
   },
   {
     name: 'Vikram Singh',
@@ -212,6 +233,26 @@ export const testimonials = [
     review:
       'Clearer meetings, stronger presence with clients. The feedback after each class was gold.',
     rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&h=160&q=80',
+  },
+  {
+    name: 'Sneha Kapoor',
+    designation: 'Marketing Executive',
+    review:
+      'I finally feel confident leading client calls. The practice drills made a real difference.',
+    rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=160&h=160&q=80',
+  },
+  {
+    name: 'Amit Verma',
+    designation: 'Software Engineer',
+    review:
+      'Clearer articulation in meetings and interviews. Coaching felt personal and actionable.',
+    rating: 5,
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&h=160&q=80',
   },
 ];
 
@@ -257,6 +298,6 @@ export const bottomCta = {
   description: 'Take the first step toward becoming a confident communicator.',
   highlights: ['Free Communication Assessment', 'Personalized Learning Plan'],
   ctaLabel: 'Book Your Free Communication Assessment',
-  ctaHref: '/free-assessment',
+  ctaHref: bookAssessmentHref,
   reassurance: 'No Obligation – 100% Free',
 };

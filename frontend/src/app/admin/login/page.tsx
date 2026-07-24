@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiFetch, ApiError } from '@/lib/api-client';
-import { setAccessToken } from '@/lib/admin-auth';
+import type { AdminUser } from '@/lib/admin-auth';
+import { useAdminAuth } from '@/components/admin/AdminAuthProvider';
 
 const loginSchema = z.object({
   email: z.email(),
@@ -22,6 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
  */
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { completeLogin } = useAdminAuth();
   const [error, setError] = useState<string | null>(null);
   const {
     register,
@@ -36,14 +38,16 @@ export default function AdminLoginPage() {
     try {
       const result = await apiFetch<{
         accessToken: string;
-        user: { fullName: string };
+        user: AdminUser;
       }>('/auth/login', {
         method: 'POST',
         body: values,
       });
 
-      setAccessToken(result.accessToken);
-      router.push('/admin/dashboard');
+      // Update auth context before navigating — otherwise the guard sees
+      // user=null on /admin/dashboard and bounces back to login.
+      completeLogin(result.accessToken, result.user);
+      router.replace('/admin/dashboard');
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -109,7 +113,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-6 w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-3 font-semibold text-[var(--color-primary-dark)] disabled:opacity-60"
+          className="mt-6 w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-3 font-semibold text-white disabled:opacity-60"
         >
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>

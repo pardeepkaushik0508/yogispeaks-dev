@@ -8,6 +8,7 @@ export default function CoursesAdminPage() {
       title="Courses"
       permission="courses.manage"
       endpoint="/admin/courses"
+      editHref={(row) => `/admin/courses/${row.id}`}
       fields={[
         { name: 'name', label: 'Name', required: true },
         { name: 'slug', label: 'Slug' },

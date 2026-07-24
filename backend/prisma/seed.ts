@@ -187,6 +187,10 @@ export async function main(): Promise<void> {
     });
   }
 
+  const { seedMarketingContent } = await import('./seed-marketing-content');
+  await seedMarketingContent(prisma);
+  console.log('Marketing content seeded (About + Spoken English).');
+
   console.log(`Seed complete. Super admin: ${email}`);
 }
 
