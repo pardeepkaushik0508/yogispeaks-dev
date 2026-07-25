@@ -84,5 +84,7 @@ export class PublicContentController {
   @Public() @Get('courses/:slug') course(@Param('slug') slug: string) { return this.cms.getCourseBySlug(slug); }
   @Public() @Get('faqs') faqs() { return this.cms.listFaqs(false); }
   @Public() @Get('testimonials') testimonials() { return this.cms.listTestimonials(false); }
+  @Public() @Get('blog-categories') blogCategories() { return this.cms.listBlogCategories(); }
   @Public() @Get('blogs') blogs() { return this.cms.listBlogPosts(false); }
+  @Public() @Get('blogs/:slug') blog(@Param('slug') slug: string) { return this.cms.getBlogPostBySlug(slug); }
 }

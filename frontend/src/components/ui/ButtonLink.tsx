@@ -9,13 +9,13 @@ type Variant = 'primary' | 'ghost-light' | 'ghost-dark' | 'header';
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] shadow-sm',
+    'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] shadow-[var(--shadow-glow-gold)]',
   'ghost-light':
-    'border border-[var(--color-accent)] bg-transparent text-white hover:bg-[var(--color-accent)]/10',
+    'border border-white/25 bg-white/5 text-white backdrop-blur-sm hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/15',
   'ghost-dark':
-    'border border-[var(--color-primary)]/20 bg-transparent text-[var(--color-primary)] hover:bg-[var(--color-surface)]',
+    'border border-[var(--color-primary)]/15 bg-white text-[var(--color-primary)] hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-card)]',
   header:
-    'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] uppercase tracking-wide text-sm',
+    'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] uppercase tracking-wide text-sm shadow-[var(--shadow-glow-gold)]',
 };
 
 type Props = {
@@ -46,7 +46,7 @@ export function ButtonLink({
   const shouldOpenAssessment = openAssessment ?? isAssessmentHref(href);
 
   const classes = cn(
-    'inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 py-3 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+    'inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
     variants[variant],
     className,
   );

@@ -1,5 +1,5 @@
 /**
- * Seeds About Us page + Spoken English course from marketing page briefs.
+ * Seeds About Us page + Spoken English + IELTS courses from marketing page briefs.
  * Idempotent via slug upserts.
  */
 import { PrismaClient, PublishStatus } from '@prisma/client';
@@ -7,6 +7,64 @@ import { PrismaClient, PublishStatus } from '@prisma/client';
 const p = (text: string) => `<p>${text}</p>`;
 const ul = (items: string[]) =>
   `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+
+async function upsertCourseFaqs(
+  prisma: PrismaClient,
+  courseId: string,
+  category: string,
+  faqs: Array<{ q: string; a: string }>,
+) {
+  await prisma.faq.updateMany({
+    where: { courseId, deletedAt: null },
+    data: { deletedAt: new Date() },
+  });
+  await prisma.faq.createMany({
+    data: faqs.map((f, i) => ({
+      courseId,
+      question: f.q,
+      answerHtml: p(f.a),
+      category,
+      showOnHomepage: false,
+      isVisible: true,
+      sortOrder: i,
+    })),
+  });
+}
+
+async function upsertCourseTestimonials(
+  prisma: PrismaClient,
+  courseLabel: string,
+  items: Array<{ studentName: string; designation: string; review: string }>,
+) {
+  for (const [i, t] of items.entries()) {
+    const found = await prisma.testimonial.findFirst({
+      where: { review: t.review, deletedAt: null },
+    });
+    if (found) {
+      await prisma.testimonial.update({
+        where: { id: found.id },
+        data: {
+          courseLabel,
+          rating: 5,
+          isVisible: true,
+          sortOrder: i,
+        },
+      });
+    } else {
+      await prisma.testimonial.create({
+        data: {
+          studentName: t.studentName,
+          designation: t.designation,
+          courseLabel,
+          review: t.review,
+          rating: 5,
+          isVisible: true,
+          sortOrder: i,
+        },
+      });
+    }
+  }
+}
 
 export async function seedMarketingContent(prisma: PrismaClient): Promise<void> {
   // ─── About Us ─────────────────────────────────────────────────────────────
@@ -286,6 +344,22 @@ export async function seedMarketingContent(prisma: PrismaClient): Promise<void> 
     ctaHref: '/free-assessment',
     secondaryCtaLabel: 'View Course Curriculum',
     secondaryCtaHref: '#curriculum',
+    whyLearnTitle: 'Why Learn Spoken English?',
+    whoShouldJoinTitle: 'Who Should Join This Course?',
+    whoShouldJoinIntro: 'This course is ideal for:',
+    curriculumTitle: 'What You Will Learn',
+    featuresTitle: 'Course Features',
+    benefitsTitle: 'Course Benefits',
+    benefitsIntro: 'After completing the course, you’ll be able to:',
+    learningStepsTitle: 'Our Teaching Method',
+    whyChooseTitle: 'Why Choose YogiSpeaks?',
+    testimonialsTitle: 'Student Success Stories',
+    faqsTitle: 'Frequently Asked Questions',
+    finalCtaHeadline: 'Start Speaking English with Confidence',
+    finalCtaBody:
+      'Take the first step toward better communication and greater opportunities.',
+    finalSecondaryCtaLabel: 'Talk to an Expert',
+    stickyCtaLabel: 'Book Free Communication Assessment',
     metaTitle:
       'Online Spoken English Classes | Learn English with Confidence | YogiSpeaks',
     metaDescription:
@@ -437,11 +511,7 @@ export async function seedMarketingContent(prisma: PrismaClient): Promise<void> 
   });
 
   // Soft-delete prior course FAQs then recreate
-  await prisma.faq.updateMany({
-    where: { courseId: course.id, deletedAt: null },
-    data: { deletedAt: new Date() },
-  });
-  const courseFaqs = [
+  await upsertCourseFaqs(prisma, course.id, 'spoken-english', [
     {
       q: 'How long is the course?',
       a: 'The duration depends on your current level and learning goals. During your Free Communication Assessment, we’ll recommend a personalized learning plan.',
@@ -466,21 +536,9 @@ export async function seedMarketingContent(prisma: PrismaClient): Promise<void> 
       q: 'Can working professionals join?',
       a: 'Yes. We offer flexible scheduling to accommodate professionals and business owners.',
     },
-  ];
-  await prisma.faq.createMany({
-    data: courseFaqs.map((f, i) => ({
-      courseId: course.id,
-      question: f.q,
-      answerHtml: p(f.a),
-      category: 'spoken-english',
-      showOnHomepage: false,
-      isVisible: true,
-      sortOrder: i,
-    })),
-  });
+  ]);
 
-  // Course-specific testimonials (idempotent by review text prefix)
-  const courseTestimonials = [
+  await upsertCourseTestimonials(prisma, 'Spoken English', [
     {
       studentName: 'Learner',
       designation: 'Software Engineer',
@@ -498,33 +556,234 @@ export async function seedMarketingContent(prisma: PrismaClient): Promise<void> 
       review:
         'The personalized feedback and practical speaking sessions made a huge difference.',
     },
-  ];
-  for (const [i, t] of courseTestimonials.entries()) {
-    const found = await prisma.testimonial.findFirst({
-      where: { review: t.review, deletedAt: null },
-    });
-    if (found) {
-      await prisma.testimonial.update({
-        where: { id: found.id },
-        data: {
-          courseLabel: 'Spoken English',
-          rating: 5,
-          isVisible: true,
-          sortOrder: i,
-        },
-      });
-    } else {
-      await prisma.testimonial.create({
-        data: {
-          studentName: t.studentName,
-          designation: t.designation,
-          courseLabel: 'Spoken English',
-          review: t.review,
-          rating: 5,
-          isVisible: true,
-          sortOrder: i,
-        },
-      });
-    }
-  }
+  ]);
+
+  // ─── IELTS Preparation Course (PAGE 4) ────────────────────────────────────
+  const ieltsData = {
+    name: 'IELTS Preparation Course',
+    slug: 'ielts-preparation',
+    shortDescription:
+      'Achieve Your Target IELTS Band Score with Expert Guidance',
+    heroHeadline: 'Achieve Your Target IELTS Band Score with Expert Guidance',
+    longDescriptionHtml: p(
+      'Whether you’re planning to study abroad, migrate, or work internationally, our personalized IELTS coaching helps you build the skills and confidence needed to achieve your desired band score.',
+    ),
+    whyLearnHtml: p(
+      'The IELTS exam evaluates your ability to communicate effectively in English. Our structured training focuses on improving all four modules while helping you understand the exam format, avoid common mistakes, and perform confidently on test day.',
+    ),
+    whoShouldJoinHtml: ul([
+      'Students planning to study abroad',
+      'Professionals applying for overseas jobs',
+      'Immigration applicants',
+      'Nurses and healthcare professionals',
+      'Anyone preparing for IELTS Academic or General Training',
+    ]),
+    whyChooseHtml: `${p(
+      'Unlike large batch coaching centers, we provide:',
+    )}${ul([
+      'Individual attention',
+      'Personalized feedback',
+      'Flexible scheduling',
+      'Regular speaking practice',
+      'Detailed writing corrections',
+      'Customized improvement strategies',
+      'Continuous mentor support',
+    ])}`,
+    duration: 'Personalized',
+    mode: 'One-to-One Live Online',
+    status: PublishStatus.PUBLISHED,
+    isFeatured: true,
+    sortOrder: 1,
+    ctaLabel: 'Book Free IELTS Assessment',
+    ctaHref: '/free-assessment',
+    secondaryCtaLabel: 'Download Course Brochure',
+    secondaryCtaHref: null as string | null,
+    whyLearnTitle: 'Why Choose Our IELTS Coaching?',
+    whoShouldJoinTitle: 'Who Should Join?',
+    whoShouldJoinIntro: 'This course is ideal for:',
+    curriculumTitle: 'What You’ll Learn',
+    featuresTitle: 'Course Features',
+    benefitsTitle: 'Expected Learning Outcomes',
+    benefitsIntro: 'By the end of the course, you’ll be able to:',
+    learningStepsTitle: 'Our Teaching Methodology',
+    whyChooseTitle: 'What Makes YogiSpeaks Different?',
+    testimonialsTitle: 'Student Success Stories',
+    faqsTitle: 'Frequently Asked Questions',
+    finalCtaHeadline: 'Take the Next Step Towards Your International Goals',
+    finalCtaBody:
+      'Achieve your target IELTS band score with personalized coaching, practical strategies, and expert guidance.',
+    finalSecondaryCtaLabel: 'Talk to an IELTS Expert',
+    stickyCtaLabel: 'Book Free IELTS Assessment',
+    metaTitle: 'Online IELTS Coaching | IELTS Preparation Classes | YogiSpeaks',
+    metaDescription:
+      'Prepare for IELTS Academic and General Training with personalized one-to-one online coaching. Improve your Listening, Reading, Writing, and Speaking skills with expert guidance at YogiSpeaks.',
+  };
+
+  const ieltsExisting = await prisma.course.findUnique({
+    where: { slug: 'ielts-preparation' },
+  });
+  const ielts = ieltsExisting
+    ? await prisma.course.update({ where: { id: ieltsExisting.id }, data: ieltsData })
+    : await prisma.course.create({ data: ieltsData });
+
+  await prisma.courseCurriculumItem.deleteMany({ where: { courseId: ielts.id } });
+  await prisma.courseCurriculumItem.createMany({
+    data: [
+      {
+        courseId: ielts.id,
+        title: 'Module 1 – Listening',
+        iconKey: 'listening',
+        bodyHtml: `${p('Develop your ability to:')}${ul([
+          'Understand different English accents',
+          'Identify key information',
+          'Improve note-taking skills',
+          'Answer various question types',
+          'Manage time effectively',
+        ])}`,
+        sortOrder: 0,
+      },
+      {
+        courseId: ielts.id,
+        title: 'Module 2 – Reading',
+        iconKey: 'reading',
+        bodyHtml: `${p('Master:')}${ul([
+          'Skimming',
+          'Scanning',
+          'Keyword identification',
+          'True/False/Not Given questions',
+          'Matching headings',
+          'Sentence completion',
+          'Time management',
+        ])}`,
+        sortOrder: 1,
+      },
+      {
+        courseId: ielts.id,
+        title: 'Module 3 – Writing',
+        iconKey: 'writing',
+        bodyHtml: `${p('<strong>Task 1</strong> — Learn to write:')}${ul([
+          'Graph Reports',
+          'Charts',
+          'Tables',
+          'Maps',
+          'Process Diagrams',
+        ])}${p('<strong>Task 2</strong> — Improve:')}${ul([
+          'Essay Structure',
+          'Argument Development',
+          'Grammar Accuracy',
+          'Vocabulary',
+          'Cohesion & Coherence',
+        ])}`,
+        sortOrder: 2,
+      },
+      {
+        courseId: ielts.id,
+        title: 'Module 4 – Speaking',
+        iconKey: 'speaking',
+        bodyHtml: `${p('Practice:')}${ul([
+          'Personal Introduction',
+          'Cue Card Speaking',
+          'Discussion Questions',
+          'Fluency',
+          'Pronunciation',
+          'Confidence Building',
+        ])}`,
+        sortOrder: 3,
+      },
+    ],
+  });
+
+  await prisma.courseFeature.deleteMany({ where: { courseId: ielts.id } });
+  await prisma.courseFeature.createMany({
+    data: [
+      'One-to-One Live Online Coaching',
+      'Personalized Study Plan',
+      'IELTS Academic & General Training',
+      'Speaking Mock Tests',
+      'Writing Evaluation with Detailed Feedback',
+      'Vocabulary Enhancement',
+      'Grammar Improvement',
+      'Weekly Performance Assessment',
+      'Flexible Class Timings',
+      'Digital Study Material',
+      'Exam Strategies & Time Management',
+    ].map((title, i) => ({ courseId: ielts.id, title, sortOrder: i })),
+  });
+
+  await prisma.courseBenefit.deleteMany({ where: { courseId: ielts.id } });
+  await prisma.courseBenefit.createMany({
+    data: [
+      'Understand the IELTS exam format confidently',
+      'Improve your Listening, Reading, Writing, and Speaking skills',
+      'Build a stronger English vocabulary',
+      'Manage time effectively during the exam',
+      'Approach every section with confidence',
+      'Increase your chances of achieving your target band score',
+    ].map((label, i) => ({ courseId: ielts.id, label, sortOrder: i })),
+  });
+
+  await prisma.courseLearningStep.deleteMany({ where: { courseId: ielts.id } });
+  await prisma.courseLearningStep.createMany({
+    data: [
+      'Free IELTS Assessment',
+      'Identify Strengths & Improvement Areas',
+      'Personalized Study Plan',
+      'Live Interactive Coaching',
+      'Regular Mock Tests & Feedback',
+      'Final Exam Preparation',
+    ].map((title, i) => ({
+      courseId: ielts.id,
+      stepNumber: i + 1,
+      title,
+      sortOrder: i,
+    })),
+  });
+
+  await upsertCourseFaqs(prisma, ielts.id, 'ielts-preparation', [
+    {
+      q: 'Which IELTS module do you teach?',
+      a: 'We provide coaching for both IELTS Academic and IELTS General Training.',
+    },
+    {
+      q: 'Are classes conducted online?',
+      a: 'Yes. All sessions are live and conducted online in a one-to-one format.',
+    },
+    {
+      q: 'Will I get speaking practice?',
+      a: 'Yes. Every learner receives regular speaking practice and mock interview sessions.',
+    },
+    {
+      q: 'Do you evaluate Writing tasks?',
+      a: 'Yes. We provide detailed corrections, feedback, and suggestions for improvement.',
+    },
+    {
+      q: 'Is study material included?',
+      a: 'Yes. Digital study material, practice exercises, vocabulary lists, and mock tests are included.',
+    },
+    {
+      q: 'Can working professionals join?',
+      a: 'Absolutely. We offer flexible class timings to suit your schedule.',
+    },
+  ]);
+
+  await upsertCourseTestimonials(prisma, 'IELTS Preparation', [
+    {
+      studentName: 'Learner',
+      designation: 'IELTS Academic Student',
+      review:
+        'The personalized writing feedback helped me improve my essays significantly.',
+    },
+    {
+      studentName: 'Learner',
+      designation: 'Working Professional',
+      review:
+        'The speaking mock tests made me feel confident on the actual exam day.',
+    },
+    {
+      studentName: 'Learner',
+      designation: 'Study Abroad Aspirant',
+      review:
+        'The structured approach and individual attention helped me achieve my target band score.',
+    },
+  ]);
 }

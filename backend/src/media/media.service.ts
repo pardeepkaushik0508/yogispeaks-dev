@@ -16,7 +16,12 @@ const ALLOWED_MIME = new Set([
   'image/webp',
   'image/gif',
   'image/svg+xml',
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]);
+
+const MAX_BYTES = 15 * 1024 * 1024;
 
 @Injectable()
 export class MediaService {
@@ -32,10 +37,12 @@ export class MediaService {
   async upload(file: Express.Multer.File, createdById?: string) {
     if (!file) throw new BadRequestException('File is required');
     if (!ALLOWED_MIME.has(file.mimetype)) {
-      throw new BadRequestException('Unsupported file type');
+      throw new BadRequestException(
+        'Unsupported file type. Allowed: images, PDF, DOC, DOCX',
+      );
     }
-    if (file.size > 8 * 1024 * 1024) {
-      throw new BadRequestException('File too large (max 8MB)');
+    if (file.size > MAX_BYTES) {
+      throw new BadRequestException('File too large (max 15MB)');
     }
 
     const ext = extname(file.originalname) || '.bin';

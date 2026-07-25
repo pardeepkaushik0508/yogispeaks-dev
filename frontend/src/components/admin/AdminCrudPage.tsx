@@ -6,6 +6,8 @@ import { DataTable } from '@/components/admin/DataTable';
 import { ConfirmModal } from '@/components/admin/ConfirmModal';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import { useToast } from '@/components/admin/Toast';
+import { TableSkeleton } from '@/components/ui/Skeleton';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { ApiError } from '@/lib/api-client';
 
 export type CrudField = {
@@ -118,7 +120,7 @@ export function AdminCrudPage({
       </div>
       <div className="mt-6">
         {loading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <TableSkeleton rows={8} cols={columns.length + 1} />
         ) : (
           <DataTable
             rows={rows}
@@ -206,8 +208,9 @@ export function AdminCrudPage({
                 type="button"
                 disabled={busy}
                 onClick={() => void save()}
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60"
               >
+                {busy ? <ButtonSpinner /> : null}
                 Save
               </button>
             </div>

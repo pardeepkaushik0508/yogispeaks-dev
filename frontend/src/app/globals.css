@@ -5,7 +5,7 @@
   --color-background: var(--color-background);
   --color-foreground: var(--color-text);
   --font-sans: var(--font-poppins);
-  --font-heading: var(--font-poppins);
+  --font-heading: var(--font-display);
   --font-signature: var(--font-allura);
 }
 
@@ -40,12 +40,74 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-family: var(--font-display), var(--font-poppins), system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Prevent wide children / animations from creating sideways scroll */
 #main-content,
 main {
   overflow-x: hidden;
   max-width: 100%;
+}
+
+/* Premium marketing utilities */
+.font-display {
+  font-family: var(--font-display), var(--font-poppins), system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.premium-grain::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.premium-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-shine::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: -40% auto -40% -30%;
+  width: 40%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%) rotate(8deg);
+  transition: transform 0.85s ease;
+}
+
+.premium-shine:hover::before {
+  transform: translateX(320%) rotate(8deg);
+}
+
+@keyframes premium-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.premium-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: premium-marquee 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-marquee-track {
+    animation: none;
+  }
 }

@@ -54,7 +54,10 @@ export function SiteHeader() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false);
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setCoursesOpen(false);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -142,7 +145,7 @@ export function SiteHeader() {
                                 transition={{ duration: 0.28, ease: 'easeInOut' }}
                               >
                                 {link.children.map((child) => (
-                                  <li key={child.href}>
+                                  <li key={child.label}>
                                     <Link
                                       href={child.href}
                                       className="block rounded-lg px-2 py-2.5 text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-accent)]"
@@ -188,7 +191,7 @@ export function SiteHeader() {
     );
 
   return (
-    <header className="sticky top-0 z-40 max-w-full overflow-x-hidden border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-[100] max-w-full border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-[4.25rem] max-w-[var(--container-width)] items-center justify-between gap-3 px-4 sm:h-[4.75rem] sm:gap-4 sm:px-6">
         <div className="min-w-0 flex-1 overflow-hidden lg:flex-none">
           <BrandLogo
@@ -205,31 +208,45 @@ export function SiteHeader() {
               <li key={link.label} className="relative">
                 {link.children ? (
                   <div
-                    className="group relative"
+                    className="relative"
                     onMouseEnter={() => setCoursesOpen(true)}
                     onMouseLeave={() => setCoursesOpen(false)}
                   >
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-[var(--color-text)] transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+                        coursesOpen
+                          ? 'text-[var(--color-accent)]'
+                          : 'text-[var(--color-text)] hover:text-[var(--color-accent)]',
+                      )}
                       aria-expanded={coursesOpen}
                       aria-haspopup="true"
                       onClick={() => setCoursesOpen((v) => !v)}
                     >
                       {link.label}
-                      <ChevronDown className="size-3.5" aria-hidden="true" />
+                      <ChevronDown
+                        className={cn(
+                          'size-3.5 transition-transform duration-200',
+                          coursesOpen && 'rotate-180',
+                        )}
+                        aria-hidden="true"
+                      />
                     </button>
                     <ul
                       className={cn(
-                        'absolute left-1/2 top-full z-50 min-w-56 -translate-x-1/2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white py-2 shadow-[var(--shadow-card)]',
+                        'absolute left-0 top-full z-[110] mt-1 min-w-56 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white py-2 shadow-[var(--shadow-card)]',
                         coursesOpen ? 'block' : 'hidden',
                       )}
+                      role="menu"
                     >
                       {link.children.map((child) => (
-                        <li key={child.href}>
+                        <li key={child.label} role="none">
                           <Link
                             href={child.href}
+                            role="menuitem"
                             className="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-surface)] hover:text-[var(--color-accent)]"
+                            onClick={() => setCoursesOpen(false)}
                           >
                             {child.label}
                           </Link>

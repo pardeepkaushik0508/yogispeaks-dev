@@ -1,50 +1,27 @@
 'use client';
 
+import Image from 'next/image';
 import { Check, Sparkles } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { RichHtml } from '@/components/marketing/RichHtml';
-import { MotionReveal, fadeUp } from '@/components/home/motion';
+import {
+  AssessmentCta,
+  CinematicHero,
+  Container,
+  DisplayHeading,
+  Eyebrow,
+  GoldRule,
+  MarqueeStrip,
+  PremiumPanel,
+} from '@/components/marketing/layout';
+import { MotionReveal, fadeUp, MotionItem, staggerContainer } from '@/components/home/motion';
 import { bookAssessmentHref } from '@/data/homepage';
 import type { CmsPage } from '@/lib/cms-types';
 import { asCtaMeta, asItemList, getPageBlock } from '@/lib/public-cms';
-
-function SectionHeading({
-  title,
-  subtitle,
-  id,
-}: {
-  title: string;
-  subtitle?: string | null;
-  id?: string;
-}) {
-  return (
-    <div className="mb-8 max-w-3xl text-center sm:mb-10 sm:mx-auto sm:text-left">
-      <h2
-        id={id}
-        className="text-2xl font-extrabold tracking-tight text-[var(--color-primary)] sm:text-3xl"
-      >
-        {title}
-      </h2>
-      {subtitle ? (
-        <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)] sm:text-base">
-          {subtitle}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function MidCta() {
-  return (
-    <div className="flex justify-center py-2">
-      <ButtonLink href={bookAssessmentHref} variant="primary" arrow>
-        Book Free Communication Assessment
-      </ButtonLink>
-    </div>
-  );
-}
+import { motion, useReducedMotion } from 'framer-motion';
 
 export function AboutPageView({ page }: { page: CmsPage }) {
+  const reduceMotion = useReducedMotion();
   const hero = getPageBlock(page, 'hero');
   const story = getPageBlock(page, 'story');
   const mission = getPageBlock(page, 'mission');
@@ -57,254 +34,311 @@ export function AboutPageView({ page }: { page: CmsPage }) {
   const commitment = getPageBlock(page, 'commitment');
   const cta = getPageBlock(page, 'cta');
   const ctaMeta = asCtaMeta(cta?.itemsJson);
+  const methodItems = asItemList(methodology?.itemsJson);
+  const whyItems = asItemList(whyChoose?.itemsJson);
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[var(--color-primary-dark)] text-[var(--color-on-dark)]">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-40"
-          style={{
-            background:
-              'radial-gradient(ellipse at 20% 20%, rgba(196,155,72,0.25), transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(17,34,64,0.8), transparent 55%)',
-          }}
-        />
-        <div className="relative mx-auto max-w-[var(--container-width)] px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
-          <MotionReveal variants={fadeUp} className="max-w-3xl">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-              {hero?.title || page.title}
-            </p>
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-              {hero?.subtitle || 'About YogiSpeaks'}
-            </h1>
-            {hero?.bodyHtml ? (
-              <div className="mt-6 [&_.rich-html]:text-white/85 [&_.rich-html_strong]:text-white">
-                <RichHtml html={hero.bodyHtml} />
-              </div>
-            ) : null}
-            <div className="mt-8">
-              <ButtonLink href={bookAssessmentHref} variant="primary" arrow>
-                Book Free Communication Assessment
-              </ButtonLink>
+      <CinematicHero
+        media="founder"
+        eyebrow={hero?.title || page.title}
+        title={
+          hero?.subtitle || (
+            <>
+              Coaching that turns hesitation into{' '}
+              <span className="text-[var(--color-accent)]">presence</span>
+            </>
+          )
+        }
+        description={
+          hero?.bodyHtml ? (
+            <div className="[&_.rich-html]:text-white/75 [&_.rich-html_strong]:text-white">
+              <RichHtml html={hero.bodyHtml} />
             </div>
-          </MotionReveal>
+          ) : (
+            'YogiSpeaks is built for learners who want real conversation skills — not classroom scripts.'
+          )
+        }
+      >
+        <div className="flex flex-wrap gap-3">
+          <ButtonLink href={bookAssessmentHref} variant="primary" arrow openAssessment>
+            Book Free Communication Assessment
+          </ButtonLink>
+          <ButtonLink href="/courses" variant="ghost-light">
+            Explore Programs
+          </ButtonLink>
         </div>
-      </section>
+      </CinematicHero>
 
-      {/* Story */}
+      <MarqueeStrip
+        items={[
+          '1:1 Mentorship',
+          'Career Communication',
+          'Spoken Fluency',
+          'Interview Presence',
+          'IELTS Speaking',
+          'Confidence Coaching',
+        ]}
+      />
+
       {story ? (
-        <section className="bg-white py-14 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <SectionHeading title={story.title || 'Our Story'} />
-            {story.bodyHtml ? <RichHtml html={story.bodyHtml} className="max-w-3xl text-[var(--color-text)]" /> : null}
-            <div className="mt-10">
-              <MidCta />
-            </div>
-          </div>
+        <section className="relative overflow-hidden bg-white py-20 sm:py-28">
+          <Container className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
+            <MotionReveal variants={fadeUp} className="relative">
+              <div className="absolute -left-6 -top-6 size-28 rounded-full bg-[var(--color-accent)]/15 blur-2xl" />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-[var(--shadow-elevated)]">
+                <Image
+                  src="/brand/founder-portrait.png"
+                  alt="Yogender, Coach & Founder of YogiSpeaks"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-primary-dark)]/80 via-transparent to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="font-[family-name:var(--font-signature)] text-5xl text-[var(--color-accent)]">
+                    Yogender
+                  </p>
+                  <p className="text-sm font-semibold text-white">Coach & Founder · YogiSpeaks</p>
+                </div>
+              </div>
+            </MotionReveal>
+            <MotionReveal variants={fadeUp}>
+              <GoldRule className="mb-5" />
+              <Eyebrow>Our story</Eyebrow>
+              <DisplayHeading as="h2" className="mt-3 text-[var(--color-primary)]">
+                {story.title || 'Built around every learner’s voice'}
+              </DisplayHeading>
+              {story.bodyHtml ? (
+                <RichHtml
+                  html={story.bodyHtml}
+                  className="mt-6 text-base leading-relaxed text-[var(--color-muted)] sm:text-lg"
+                />
+              ) : null}
+              <div className="mt-10">
+                <AssessmentCta className="justify-start" />
+              </div>
+            </MotionReveal>
+          </Container>
         </section>
       ) : null}
 
-      {/* Mission + Vision */}
       {(mission || vision) && (
-        <section className="bg-[var(--color-surface)] py-14 sm:py-16">
-          <div className="mx-auto grid max-w-[var(--container-width)] gap-6 px-4 sm:px-6 lg:grid-cols-2">
+        <section className="bg-[var(--color-primary)] py-20 text-white sm:py-28">
+          <Container className="grid gap-6 lg:grid-cols-2">
             {mission ? (
-              <MotionReveal
-                variants={fadeUp}
-                className="rounded-2xl border border-[var(--color-border)] bg-white p-6 sm:p-8"
-              >
-                <h2 className="text-xl font-extrabold text-[var(--color-primary)]">
+              <PremiumPanel>
+                <Eyebrow>Mission</Eyebrow>
+                <DisplayHeading as="h2" className="mt-3 text-white">
                   {mission.title || 'Our Mission'}
-                </h2>
+                </DisplayHeading>
                 {mission.bodyHtml ? (
-                  <RichHtml html={mission.bodyHtml} className="mt-4" />
+                  <div className="mt-5 [&_.rich-html]:text-white/75">
+                    <RichHtml html={mission.bodyHtml} />
+                  </div>
                 ) : null}
-              </MotionReveal>
+              </PremiumPanel>
             ) : null}
             {vision ? (
-              <MotionReveal
-                variants={fadeUp}
-                className="rounded-2xl border border-[var(--color-border)] bg-white p-6 sm:p-8"
-              >
-                <h2 className="text-xl font-extrabold text-[var(--color-primary)]">
+              <PremiumPanel className="border-[var(--color-accent)]/25 bg-gradient-to-br from-[var(--color-accent)]/15 to-transparent">
+                <Eyebrow>Vision</Eyebrow>
+                <DisplayHeading as="h2" className="mt-3 text-white">
                   {vision.title || 'Our Vision'}
-                </h2>
+                </DisplayHeading>
                 {vision.bodyHtml ? (
-                  <RichHtml html={vision.bodyHtml} className="mt-4" />
+                  <div className="mt-5 [&_.rich-html]:text-white/75">
+                    <RichHtml html={vision.bodyHtml} />
+                  </div>
                 ) : null}
-              </MotionReveal>
+              </PremiumPanel>
             ) : null}
-          </div>
+          </Container>
         </section>
       )}
 
-      {/* Values */}
       {values ? (
-        <section className="bg-white py-14 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <SectionHeading title={values.title || 'Our Core Values'} />
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {asItemList(values.itemsJson).map((item) => (
-                <li
-                  key={item.title}
-                  className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
-                >
-                  <div className="mb-3 inline-flex size-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-[var(--color-accent)]">
-                    <Sparkles className="size-5" aria-hidden />
-                  </div>
-                  <h3 className="font-bold text-[var(--color-primary)]">{item.title}</h3>
-                  {item.description ? (
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">
-                      {item.description}
-                    </p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-10">
-              <MidCta />
+        <section className="bg-[var(--color-surface)] py-20 sm:py-28">
+          <Container>
+            <div className="mb-14 max-w-2xl">
+              <GoldRule className="mb-5" />
+              <Eyebrow tone="dark">Principles</Eyebrow>
+              <DisplayHeading as="h2" className="mt-3 text-[var(--color-primary)]">
+                {values.title || 'Our Core Values'}
+              </DisplayHeading>
             </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Why choose */}
-      {whyChoose ? (
-        <section className="bg-[var(--color-primary-dark)] py-14 text-[var(--color-on-dark)] sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <h2 className="mb-8 text-center text-2xl font-extrabold tracking-tight sm:mb-10 sm:text-3xl">
-              {whyChoose.title || 'Why Thousands Choose YogiSpeaks'}
-            </h2>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {asItemList(whyChoose.itemsJson).map((item) => (
-                <li
+            <motion.ul
+              className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+              variants={staggerContainer}
+              initial={reduceMotion ? false : 'hidden'}
+              whileInView={reduceMotion ? undefined : 'visible'}
+              viewport={{ once: true, amount: 0.15 }}
+            >
+              {asItemList(values.itemsJson).map((item, i) => (
+                <MotionItem
                   key={item.title}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm"
+                  as="li"
+                  variants={fadeUp}
+                  className="premium-shine group relative overflow-hidden rounded-[1.75rem] bg-white p-7 shadow-[var(--shadow-card)]"
                 >
-                  <h3 className="font-bold text-[var(--color-accent)]">{item.title}</h3>
+                  <span className="absolute right-5 top-3 font-display text-6xl font-extrabold text-[var(--color-primary)]/[0.04] transition-colors group-hover:text-[var(--color-accent)]/15">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="mb-5 inline-flex size-12 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-[var(--color-accent)]">
+                    <Sparkles className="size-5" />
+                  </div>
+                  <h3 className="font-display text-lg font-bold text-[var(--color-primary)]">
+                    {item.title}
+                  </h3>
                   {item.description ? (
-                    <p className="mt-2 text-sm leading-relaxed text-white/80">
+                    <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted)]">
                       {item.description}
                     </p>
                   ) : null}
-                </li>
+                </MotionItem>
               ))}
-            </ul>
-          </div>
+            </motion.ul>
+          </Container>
         </section>
       ) : null}
 
-      {/* Methodology */}
-      {methodology ? (
-        <section className="bg-white py-14 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <SectionHeading
-              title={methodology.title || 'Our Teaching Methodology'}
-              subtitle={methodology.subtitle}
-            />
-            <ol className="relative mx-auto max-w-2xl space-y-0">
-              {asItemList(methodology.itemsJson).map((item, i) => (
-                <li key={item.title} className="relative flex gap-4 pb-8 last:pb-0">
-                  {i < asItemList(methodology.itemsJson).length - 1 ? (
-                    <span
-                      aria-hidden
-                      className="absolute left-5 top-12 h-[calc(100%-2.5rem)] w-px bg-[var(--color-border)]"
-                    />
+      {whyChoose ? (
+        <section className="premium-grain relative overflow-hidden bg-[var(--color-primary-dark)] py-20 text-white sm:py-28">
+          <Container className="relative">
+            <DisplayHeading as="h2" className="mx-auto mb-14 max-w-3xl text-center text-white">
+              {whyChoose.title || 'Why Thousands Choose YogiSpeaks'}
+            </DisplayHeading>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {whyItems.map((item, i) => (
+                <div
+                  key={item.title}
+                  className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-[var(--color-accent)]/40 hover:bg-white/[0.06]"
+                >
+                  <p className="mb-3 text-xs font-bold tracking-[0.2em] text-[var(--color-accent)]">
+                    {String(i + 1).padStart(2, '0')}
+                  </p>
+                  <h3 className="font-display text-lg font-bold text-white">{item.title}</h3>
+                  {item.description ? (
+                    <p className="mt-2 text-sm leading-relaxed text-white/65">{item.description}</p>
                   ) : null}
-                  <span className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-bold text-white">
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {methodology ? (
+        <section className="bg-white py-20 sm:py-28">
+          <Container>
+            <div className="mb-14 max-w-2xl">
+              <GoldRule className="mb-5" />
+              <DisplayHeading as="h2" className="text-[var(--color-primary)]">
+                {methodology.title || 'Our Teaching Methodology'}
+              </DisplayHeading>
+              {methodology.subtitle ? (
+                <p className="mt-4 text-[var(--color-muted)]">{methodology.subtitle}</p>
+              ) : null}
+            </div>
+            <ol className="relative grid gap-4 lg:grid-cols-5">
+              {methodItems.map((item, i) => (
+                <li
+                  key={item.title}
+                  className="relative rounded-[1.5rem] bg-[var(--color-surface)] p-5 pt-8"
+                >
+                  <span className="absolute -top-3 left-5 inline-flex size-9 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-bold text-white shadow-[var(--shadow-glow-gold)]">
                     {i + 1}
                   </span>
-                  <div className="pt-1.5">
-                    <h3 className="font-bold text-[var(--color-primary)]">{item.title}</h3>
-                    {item.description ? (
-                      <p className="mt-1 text-sm leading-relaxed text-[var(--color-muted)]">
-                        {item.description}
-                      </p>
-                    ) : null}
-                  </div>
+                  <h3 className="font-display font-bold text-[var(--color-primary)]">{item.title}</h3>
+                  {item.description ? (
+                    <p className="mt-2 text-sm text-[var(--color-muted)]">{item.description}</p>
+                  ) : null}
                 </li>
               ))}
             </ol>
-            <div className="mt-10">
-              <MidCta />
+            <div className="mt-14">
+              <AssessmentCta />
             </div>
-          </div>
+          </Container>
         </section>
       ) : null}
 
-      {/* Who can join */}
       {whoCanJoin ? (
-        <section className="bg-[var(--color-surface)] py-14 sm:py-16">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <SectionHeading
-              title={whoCanJoin.title || 'Who Can Join?'}
-              subtitle={whoCanJoin.subtitle}
-            />
-            <ul className="flex flex-wrap justify-center gap-2 sm:justify-start">
+        <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)] py-16">
+          <Container>
+            <DisplayHeading as="h2" className="mb-8 text-[var(--color-primary)]">
+              {whoCanJoin.title || 'Who Can Join?'}
+            </DisplayHeading>
+            <ul className="flex flex-wrap gap-3">
               {asItemList(whoCanJoin.itemsJson).map((item) => (
                 <li
                   key={item.title}
-                  className="rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-primary)]"
+                  className="rounded-full bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white"
                 >
                   {item.title}
                 </li>
               ))}
             </ul>
-          </div>
+          </Container>
         </section>
       ) : null}
 
-      {/* Differentiators */}
       {differentiators ? (
-        <section className="bg-white py-14 sm:py-16 lg:py-20">
-          <div className="mx-auto max-w-[var(--container-width)] px-4 sm:px-6">
-            <SectionHeading title={differentiators.title || 'What Makes Us Different?'} />
-            <ul className="grid gap-3 sm:grid-cols-2">
+        <section className="bg-white py-20 sm:py-24">
+          <Container className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <GoldRule className="mb-5" />
+              <DisplayHeading as="h2" className="text-[var(--color-primary)]">
+                {differentiators.title || 'What Makes Us Different?'}
+              </DisplayHeading>
+            </div>
+            <ul className="space-y-0">
               {asItemList(differentiators.itemsJson).map((item) => (
-                <li key={item.title} className="flex items-start gap-3 text-sm sm:text-base">
-                  <Check
-                    className="mt-0.5 size-5 shrink-0 text-[var(--color-accent)]"
-                    aria-hidden
-                  />
-                  <span className="font-medium text-[var(--color-text)]">{item.title}</span>
+                <li
+                  key={item.title}
+                  className="flex items-start gap-4 border-b border-[var(--color-border)] py-5 last:border-0"
+                >
+                  <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+                    <Check className="size-4" />
+                  </span>
+                  <span className="font-display text-lg font-semibold text-[var(--color-text)]">
+                    {item.title}
+                  </span>
                 </li>
               ))}
             </ul>
-          </div>
+          </Container>
         </section>
       ) : null}
 
-      {/* Commitment */}
       {commitment ? (
-        <section className="bg-[var(--color-surface)] py-14 sm:py-16">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-            <h2 className="text-2xl font-extrabold text-[var(--color-primary)] sm:text-3xl">
+        <section className="bg-[var(--color-surface)] py-20 sm:py-24">
+          <Container className="max-w-3xl text-center">
+            <p className="font-[family-name:var(--font-signature)] text-7xl leading-none text-[var(--color-accent)]">
+              “
+            </p>
+            <DisplayHeading as="h2" className="text-[var(--color-primary)]">
               {commitment.title || 'Our Commitment'}
-            </h2>
+            </DisplayHeading>
             {commitment.bodyHtml ? (
               <RichHtml html={commitment.bodyHtml} className="mt-6 text-left sm:text-center" />
             ) : null}
-          </div>
+          </Container>
         </section>
       ) : null}
 
-      {/* Final CTA */}
       {cta ? (
-        <section className="bg-[var(--color-primary-dark)] py-14 text-[var(--color-on-dark)] sm:py-16">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-              {cta.title}
-            </p>
-            <h2 className="mt-3 text-2xl font-extrabold sm:text-3xl">
+        <section className="premium-grain relative overflow-hidden bg-[var(--color-primary-dark)] py-20 text-white sm:py-28">
+          <Container className="relative max-w-3xl text-center">
+            <Eyebrow>{cta.title}</Eyebrow>
+            <DisplayHeading as="h2" className="mt-4 text-white">
               {cta.subtitle || 'Start Your Communication Journey Today'}
-            </h2>
+            </DisplayHeading>
             {cta.bodyHtml ? (
-              <div className="mt-4 [&_.rich-html]:text-white/85">
+              <div className="mt-5 [&_.rich-html]:text-white/75">
                 <RichHtml html={cta.bodyHtml} />
               </div>
             ) : null}
-            <div className="mt-8 flex justify-center">
+            <div className="mt-10 flex justify-center">
               <ButtonLink
                 href={ctaMeta.buttonHref || bookAssessmentHref}
                 variant="primary"
@@ -314,7 +348,7 @@ export function AboutPageView({ page }: { page: CmsPage }) {
                 {ctaMeta.buttonLabel || 'Book Free Communication Assessment'}
               </ButtonLink>
             </div>
-          </div>
+          </Container>
         </section>
       ) : null}
     </>

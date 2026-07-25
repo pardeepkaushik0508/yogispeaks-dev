@@ -9,6 +9,8 @@ import { useToast } from '@/components/admin/Toast';
 import { ApiError } from '@/lib/api-client';
 import { getAccessToken } from '@/lib/admin-auth';
 import { publicEnv } from '@/lib/env';
+import { TableSkeleton } from '@/components/ui/Skeleton';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 
 type MediaRow = {
   id: string;
@@ -75,13 +77,17 @@ export default function MediaAdminPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Media</h2>
-          <p className="text-sm text-slate-500">Upload and manage assets.</p>
+          <p className="text-sm text-slate-500">
+            Upload images and documents (PDF/DOC up to 15MB). Assign brochures from course
+            editors.
+          </p>
         </div>
-        <label className="cursor-pointer rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+          {busy ? <ButtonSpinner /> : null}
           {busy ? 'Uploading…' : 'Upload'}
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.pdf,.doc,.docx,application/pdf"
             className="hidden"
             disabled={busy}
             onChange={(e) => {
@@ -93,7 +99,7 @@ export default function MediaAdminPage() {
       </div>
       <div className="mt-6">
         {loading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <TableSkeleton rows={6} cols={4} />
         ) : (
           <DataTable
             rows={rows}
@@ -101,18 +107,23 @@ export default function MediaAdminPage() {
               {
                 key: 'preview',
                 header: 'Preview',
-                render: (r) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={
-                      r.url.startsWith('http')
-                        ? r.url
-                        : `${publicEnv.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '')}${r.url}`
-                    }
-                    alt={r.alt ?? ''}
-                    className="size-12 rounded object-cover"
-                  />
-                ),
+                render: (r) =>
+                  r.mimeType?.startsWith('image/') ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={
+                        r.url.startsWith('http')
+                          ? r.url
+                          : `${String(publicEnv.NEXT_PUBLIC_API_URL).replace(/\/api\/v1\/?$/, '')}${r.url}`
+                      }
+                      alt={r.alt ?? ''}
+                      className="size-12 rounded object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex size-12 items-center justify-center rounded bg-slate-100 text-[10px] font-semibold uppercase text-slate-600">
+                      {r.mimeType?.includes('pdf') ? 'PDF' : 'DOC'}
+                    </span>
+                  ),
               },
               {
                 key: 'title',

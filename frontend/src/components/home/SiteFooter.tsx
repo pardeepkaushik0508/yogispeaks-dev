@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 import { WhatsAppIcon } from '@/components/home/WhatsAppButton';
-import { homepageAnchors, navLinks, programs, siteContact, socialLinks } from '@/data/homepage';
+import { NewsletterForm } from '@/components/marketing/NewsletterForm';
+import { navLinks, programs, siteContact, socialLinks } from '@/data/homepage';
 
 const icons = {
   facebook: Facebook,
@@ -18,6 +19,13 @@ const icons = {
   linkedin: Linkedin,
   whatsapp: WhatsAppIcon,
 };
+
+function programHref(slug: string) {
+  if (slug === 'spoken-english' || slug === 'ielts-preparation') {
+    return `/courses/${slug}`;
+  }
+  return '/courses';
+}
 
 export function SiteFooter() {
   return (
@@ -75,7 +83,7 @@ export function SiteFooter() {
             {programs.map((program) => (
               <li key={program.slug}>
                 <Link
-                  href={homepageAnchors.programs}
+                  href={programHref(program.slug)}
                   className="hover:text-[var(--color-accent)]"
                 >
                   {program.title}
@@ -91,6 +99,11 @@ export function SiteFooter() {
           </h2>
           <ul className="space-y-2 text-sm">
             <li>{siteContact.address}</li>
+            <li>
+              <Link href="/contact" className="hover:text-[var(--color-accent)]">
+                Contact form
+              </Link>
+            </li>
             <li>
               <a
                 href={siteContact.emailHref}
@@ -120,46 +133,23 @@ export function SiteFooter() {
           <p className="mb-3 text-sm">
             Get coaching tips and program updates in your inbox.
           </p>
-          <form className="flex flex-col gap-2" action="#" method="post">
-            <label htmlFor="newsletter-email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="newsletter-email"
-              name="email"
-              type="email"
-              required
-              placeholder="Your email"
-              className="rounded-[var(--radius-md)] border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            />
-            <button
-              type="submit"
-              className="rounded-[var(--radius-md)] bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            >
-              Subscribe
-            </button>
-          </form>
+          <NewsletterForm source="footer" />
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-[var(--container-width)] flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs sm:px-6">
           <p>&copy; {new Date().getFullYear()} YogiSpeaks. All rights reserved.</p>
-          <div className="flex gap-4">
-            <span
-              className="hover:text-[var(--color-accent)]"
-              aria-disabled="true"
-              title="Coming soon"
-            >
+          <div className="flex flex-wrap gap-4">
+            <Link href="/privacy" className="hover:text-[var(--color-accent)]">
               Privacy
-            </span>
-            <span
-              className="hover:text-[var(--color-accent)]"
-              aria-disabled="true"
-              title="Coming soon"
-            >
+            </Link>
+            <Link href="/terms" className="hover:text-[var(--color-accent)]">
               Terms
-            </span>
+            </Link>
+            <Link href="/refund-policy" className="hover:text-[var(--color-accent)]">
+              Refund Policy
+            </Link>
           </div>
         </div>
       </div>

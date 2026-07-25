@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { MediaPicker } from '@/components/admin/MediaPicker';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import { useToast } from '@/components/admin/Toast';
+import { FormSkeleton } from '@/components/ui/Skeleton';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { ApiError } from '@/lib/api-client';
 
 type CourseRow = {
@@ -18,6 +21,21 @@ type CourseRow = {
   whyLearnHtml?: string | null;
   whoShouldJoinHtml?: string | null;
   whyChooseHtml?: string | null;
+  whyLearnTitle?: string | null;
+  whoShouldJoinTitle?: string | null;
+  whoShouldJoinIntro?: string | null;
+  curriculumTitle?: string | null;
+  featuresTitle?: string | null;
+  benefitsTitle?: string | null;
+  benefitsIntro?: string | null;
+  learningStepsTitle?: string | null;
+  whyChooseTitle?: string | null;
+  testimonialsTitle?: string | null;
+  faqsTitle?: string | null;
+  finalCtaHeadline?: string | null;
+  finalCtaBody?: string | null;
+  finalSecondaryCtaLabel?: string | null;
+  stickyCtaLabel?: string | null;
   duration: string;
   mode: string;
   status: string;
@@ -28,10 +46,14 @@ type CourseRow = {
   secondaryCtaHref?: string | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  featuredImageId?: string | null;
+  brochureMediaId?: string | null;
+  featuredImage?: { id?: string; url?: string } | null;
+  brochureMedia?: { id?: string; url?: string; title?: string } | null;
   benefits: { label: string }[];
   features: { title: string; description?: string | null }[];
   learningSteps: { stepNumber: number; title: string; description?: string | null }[];
-  curriculumItems: { title: string; bodyHtml?: string | null }[];
+  curriculumItems: { title: string; bodyHtml?: string | null; iconKey?: string | null }[];
   faqs: { question: string; answerHtml: string }[];
 };
 
@@ -64,7 +86,11 @@ export default function CourseEditorAdmin() {
     setLoading(true);
     try {
       const data = await get<CourseRow>(`/admin/courses/${params.id}`);
-      setCourse(data);
+      setCourse({
+        ...data,
+        featuredImageId: data.featuredImageId || data.featuredImage?.id || null,
+        brochureMediaId: data.brochureMediaId || data.brochureMedia?.id || null,
+      });
       setBenefitsText(labelsToLines(data.benefits || []));
       setFeaturesText(
         JSON.stringify(
@@ -92,6 +118,7 @@ export default function CourseEditorAdmin() {
           (data.curriculumItems || []).map((c) => ({
             title: c.title,
             bodyHtml: c.bodyHtml || '',
+            iconKey: c.iconKey || undefined,
           })),
           null,
           2,
@@ -138,6 +165,21 @@ export default function CourseEditorAdmin() {
         whyLearnHtml: course.whyLearnHtml,
         whoShouldJoinHtml: course.whoShouldJoinHtml,
         whyChooseHtml: course.whyChooseHtml,
+        whyLearnTitle: course.whyLearnTitle,
+        whoShouldJoinTitle: course.whoShouldJoinTitle,
+        whoShouldJoinIntro: course.whoShouldJoinIntro,
+        curriculumTitle: course.curriculumTitle,
+        featuresTitle: course.featuresTitle,
+        benefitsTitle: course.benefitsTitle,
+        benefitsIntro: course.benefitsIntro,
+        learningStepsTitle: course.learningStepsTitle,
+        whyChooseTitle: course.whyChooseTitle,
+        testimonialsTitle: course.testimonialsTitle,
+        faqsTitle: course.faqsTitle,
+        finalCtaHeadline: course.finalCtaHeadline,
+        finalCtaBody: course.finalCtaBody,
+        finalSecondaryCtaLabel: course.finalSecondaryCtaLabel,
+        stickyCtaLabel: course.stickyCtaLabel,
         duration: course.duration,
         mode: course.mode,
         status: course.status,
@@ -148,6 +190,8 @@ export default function CourseEditorAdmin() {
         secondaryCtaHref: course.secondaryCtaHref,
         metaTitle: course.metaTitle,
         metaDescription: course.metaDescription,
+        featuredImageId: course.featuredImageId || null,
+        brochureMediaId: course.brochureMediaId || null,
         benefits: linesToLabels(benefitsText),
         features,
         learningSteps,
@@ -193,16 +237,40 @@ export default function CourseEditorAdmin() {
           type="button"
           disabled={busy || !course}
           onClick={() => void save()}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
         >
+          {busy ? <ButtonSpinner /> : null}
           {busy ? 'Saving…' : 'Save changes'}
         </button>
       </div>
 
       {loading || !course ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <FormSkeleton fields={8} />
       ) : (
         <div className="mt-6 space-y-6">
+          <section className="rounded-md border bg-white p-4">
+            <h3 className="font-semibold">Media uploads</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Upload a featured image and optional course brochure (PDF/DOC). The brochure
+              powers the “Download Course Brochure” button on the public course page.
+            </p>
+            <div className="mt-4 grid gap-6 sm:grid-cols-2">
+              <MediaPicker
+                label="Featured / hero image"
+                accept="image/*"
+                value={course.featuredImageId}
+                onChange={(id) => setField('featuredImageId', id)}
+              />
+              <MediaPicker
+                label="Course brochure"
+                accept=".pdf,.doc,.docx,application/pdf,image/*"
+                hint="PDF recommended. Max 15MB."
+                value={course.brochureMediaId}
+                onChange={(id) => setField('brochureMediaId', id)}
+              />
+            </div>
+          </section>
+
           <section className="rounded-md border bg-white p-4">
             <h3 className="font-semibold">Basics & SEO</h3>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -218,6 +286,7 @@ export default function CourseEditorAdmin() {
                   ['ctaHref', 'Primary CTA href'],
                   ['secondaryCtaLabel', 'Secondary CTA label'],
                   ['secondaryCtaHref', 'Secondary CTA href'],
+                  ['stickyCtaLabel', 'Sticky mobile CTA label'],
                   ['metaTitle', 'Meta title'],
                   ['metaDescription', 'Meta description'],
                 ] as const
@@ -249,6 +318,47 @@ export default function CourseEditorAdmin() {
                   onChange={(e) => setField('isFeatured', e.target.checked)}
                 />
                 Featured on homepage
+              </label>
+            </div>
+          </section>
+
+          <section className="rounded-md border bg-white p-4">
+            <h3 className="font-semibold">Section titles & final CTA</h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {(
+                [
+                  ['whyLearnTitle', 'Why learn title'],
+                  ['whoShouldJoinTitle', 'Who should join title'],
+                  ['whoShouldJoinIntro', 'Who should join intro'],
+                  ['curriculumTitle', 'Curriculum title'],
+                  ['featuresTitle', 'Features title'],
+                  ['benefitsTitle', 'Benefits / outcomes title'],
+                  ['benefitsIntro', 'Benefits intro'],
+                  ['learningStepsTitle', 'Teaching method title'],
+                  ['whyChooseTitle', 'Why choose title'],
+                  ['testimonialsTitle', 'Testimonials title'],
+                  ['faqsTitle', 'FAQs title'],
+                  ['finalCtaHeadline', 'Final CTA headline'],
+                  ['finalSecondaryCtaLabel', 'Final secondary CTA label'],
+                ] as const
+              ).map(([field, label]) => (
+                <label key={field} className="block text-sm font-medium">
+                  {label}
+                  <input
+                    className="mt-1 w-full rounded-md border px-3 py-2"
+                    value={String(course[field] ?? '')}
+                    onChange={(e) => setField(field, e.target.value)}
+                  />
+                </label>
+              ))}
+              <label className="block text-sm font-medium sm:col-span-2">
+                Final CTA body
+                <textarea
+                  className="mt-1 w-full rounded-md border px-3 py-2"
+                  rows={3}
+                  value={String(course.finalCtaBody ?? '')}
+                  onChange={(e) => setField('finalCtaBody', e.target.value)}
+                />
               </label>
             </div>
           </section>

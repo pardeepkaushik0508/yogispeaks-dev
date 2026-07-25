@@ -1,8 +1,8 @@
-﻿import { Body, Controller, Delete, Get, Header, Param, Patch, Post, Query, Res } from '@nestjs/common';
+﻿import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { InquiryStatus } from '@prisma/client';
-import { CurrentUser, Permissions } from '../auth/decorators/auth.decorators';
+import { CurrentUser, Permissions, Public } from '../auth/decorators/auth.decorators';
 import type { AuthUser } from '../auth/interfaces/jwt-payload.interface';
 import { OpsService } from './ops.service';
 
@@ -49,4 +49,43 @@ export class OpsController {
 
   @Get('dashboard/stats') @Permissions('dashboard.read')
   stats() { return this.ops.dashboardStats(); }
+}
+
+@ApiTags('Public Leads')
+@Controller('public')
+export class PublicLeadsController {
+  constructor(private readonly ops: OpsService) {}
+
+  @Public()
+  @Post('inquiries')
+  createInquiry(@Body() body: Record<string, unknown>) {
+    return this.ops.createPublicInquiry({
+      type: body.type === 'CONTACT' ? 'CONTACT' : 'ASSESSMENT',
+      fullName: String(body.fullName || body.name || ''),
+      email: String(body.email || ''),
+      mobile: body.mobile || body.phone ? String(body.mobile || body.phone) : undefined,
+      whatsapp: body.whatsapp ? String(body.whatsapp) : undefined,
+      interestedCourseLabel: body.interestedCourseLabel || body.preferredCourse
+        ? String(body.interestedCourseLabel || body.preferredCourse)
+        : undefined,
+      communicationLevel: body.communicationLevel || body.currentLevel
+        ? String(body.communicationLevel || body.currentLevel)
+        : undefined,
+      learningGoal: body.learningGoal ? String(body.learningGoal) : undefined,
+      preferredTiming: body.preferredTiming ? String(body.preferredTiming) : undefined,
+      preferredContactMethod: body.preferredContactMethod
+        ? String(body.preferredContactMethod)
+        : undefined,
+      message: body.message ? String(body.message) : undefined,
+      country: body.country ? String(body.country) : undefined,
+      sourcePage: body.sourcePage ? String(body.sourcePage) : undefined,
+      consentAccepted: body.consentAccepted !== false,
+    });
+  }
+
+  @Public()
+  @Post('newsletter')
+  subscribe(@Body() body: { email?: string; source?: string }) {
+    return this.ops.subscribeNewsletter(String(body.email || ''), body.source);
+  }
 }

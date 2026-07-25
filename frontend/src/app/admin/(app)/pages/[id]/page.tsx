@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PermissionGate } from '@/components/admin/PermissionGate';
+import { MediaPicker } from '@/components/admin/MediaPicker';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import { useToast } from '@/components/admin/Toast';
+import { FormSkeleton } from '@/components/ui/Skeleton';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { ApiError } from '@/lib/api-client';
 
 type Block = {
@@ -26,6 +29,8 @@ type PageRow = {
   status: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  heroImageId?: string | null;
+  heroImage?: { id?: string; url?: string } | null;
   blocks: Block[];
 };
 
@@ -53,7 +58,10 @@ export default function PageEditorAdmin() {
     setLoading(true);
     try {
       const data = await get<PageRow>(`/admin/pages/${params.id}`);
-      setPage(data);
+      setPage({
+        ...data,
+        heroImageId: data.heroImageId || data.heroImage?.id || null,
+      });
       const texts: Record<string, string> = {};
       for (const b of data.blocks || []) {
         texts[b.key] = itemsToText(b.itemsJson);
@@ -90,6 +98,7 @@ export default function PageEditorAdmin() {
         status: page.status,
         metaTitle: page.metaTitle,
         metaDescription: page.metaDescription,
+        heroImageId: page.heroImageId || null,
         blocks,
       });
       push('Page saved');
@@ -155,14 +164,15 @@ export default function PageEditorAdmin() {
           type="button"
           disabled={busy || !page}
           onClick={() => void save()}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
         >
+          {busy ? <ButtonSpinner /> : null}
           {busy ? 'Saving…' : 'Save changes'}
         </button>
       </div>
 
       {loading || !page ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <FormSkeleton fields={8} />
       ) : (
         <div className="mt-6 space-y-6">
           <section className="rounded-md border bg-white p-4">
@@ -206,6 +216,16 @@ export default function PageEditorAdmin() {
                 />
               </label>
             </div>
+          </section>
+
+          <section className="rounded-md border bg-white p-4">
+            <MediaPicker
+              label="Hero image"
+              accept="image/*"
+              hint="Optional banner image for this page (About, Contact, etc.)."
+              value={page.heroImageId}
+              onChange={(id) => setPage({ ...page, heroImageId: id })}
+            />
           </section>
 
           <div className="flex items-center justify-between">

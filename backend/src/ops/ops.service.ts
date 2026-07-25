@@ -1,5 +1,5 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
-import { InquiryStatus } from '@prisma/client';
+﻿import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InquiryStatus, InquiryType, SubscriberStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { sanitizeRichTextHtml } from '../common/utils/sanitize-html.util';
 
@@ -85,6 +85,79 @@ export class OpsService {
 
   async removeSubscriber(id: string) {
     return this.prisma.newsletterSubscriber.delete({ where: { id } });
+  }
+
+  async createPublicInquiry(dto: {
+    type?: 'ASSESSMENT' | 'CONTACT';
+    fullName: string;
+    email: string;
+    mobile?: string;
+    whatsapp?: string;
+    interestedCourseLabel?: string;
+    communicationLevel?: string;
+    learningGoal?: string;
+    preferredTiming?: string;
+    preferredContactMethod?: string;
+    message?: string;
+    country?: string;
+    sourcePage?: string;
+    consentAccepted?: boolean;
+  }) {
+    const fullName = (dto.fullName || '').trim();
+    const email = (dto.email || '').trim().toLowerCase();
+    if (fullName.length < 2) throw new BadRequestException('Full name is required');
+    if (!email || !email.includes('@')) throw new BadRequestException('Valid email is required');
+
+    const messageParts = [
+      dto.country ? `Country: ${dto.country.trim()}` : '',
+      dto.message?.trim() || '',
+    ].filter(Boolean);
+
+    return this.prisma.inquiry.create({
+      data: {
+        type: dto.type === 'CONTACT' ? InquiryType.CONTACT : InquiryType.ASSESSMENT,
+        fullName,
+        email,
+        mobile: dto.mobile?.trim() || null,
+        whatsapp: dto.whatsapp?.trim() || null,
+        interestedCourseLabel: dto.interestedCourseLabel?.trim() || null,
+        communicationLevel: dto.communicationLevel?.trim() || null,
+        learningGoal: dto.learningGoal?.trim() || null,
+        preferredTiming: dto.preferredTiming?.trim() || null,
+        preferredContactMethod: dto.preferredContactMethod?.trim() || null,
+        message: messageParts.length ? messageParts.join('\n\n') : null,
+        sourcePage: dto.sourcePage?.trim() || null,
+        consentAccepted: dto.consentAccepted ?? true,
+      },
+      select: { id: true, createdAt: true },
+    });
+  }
+
+  async subscribeNewsletter(emailRaw: string, source?: string) {
+    const email = (emailRaw || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      throw new BadRequestException('Valid email is required');
+    }
+    const existing = await this.prisma.newsletterSubscriber.findUnique({ where: { email } });
+    if (existing) {
+      if (existing.status === SubscriberStatus.UNSUBSCRIBED) {
+        return this.prisma.newsletterSubscriber.update({
+          where: { id: existing.id },
+          data: {
+            status: SubscriberStatus.ACTIVE,
+            unsubscribedAt: null,
+            subscribedAt: new Date(),
+            source: source || existing.source,
+          },
+          select: { id: true, email: true, status: true },
+        });
+      }
+      return { id: existing.id, email: existing.email, status: existing.status };
+    }
+    return this.prisma.newsletterSubscriber.create({
+      data: { email, source: source || 'website' },
+      select: { id: true, email: true, status: true },
+    });
   }
 
   listEmailTemplates() {

@@ -404,6 +404,7 @@ model Course {
   shortDescription   String        @db.Text
   longDescriptionHtml String       @db.Text
   featuredImageId    String?       @db.Uuid
+  brochureMediaId    String?       @db.Uuid
   duration           String
   mode               String
   feeAmount          Decimal?      @db.Decimal(10, 2)
@@ -414,6 +415,22 @@ model Course {
   whyLearnHtml       String?       @db.Text
   whyChooseHtml      String?       @db.Text
   heroHeadline       String?
+  /// Per-course section headings / CTA copy (admin-editable).
+  whyLearnTitle           String?
+  whoShouldJoinTitle      String?
+  whoShouldJoinIntro      String?
+  curriculumTitle         String?
+  featuresTitle           String?
+  benefitsTitle           String?
+  benefitsIntro           String?
+  learningStepsTitle      String?
+  whyChooseTitle          String?
+  testimonialsTitle       String?
+  faqsTitle               String?
+  finalCtaHeadline        String?
+  finalCtaBody            String?  @db.Text
+  finalSecondaryCtaLabel  String?
+  stickyCtaLabel          String?
   secondaryCtaLabel  String?
   secondaryCtaHref   String?
   ctaLabel           String?
@@ -436,6 +453,7 @@ model Course {
   deletedAt          DateTime?
 
   featuredImage MediaAsset? @relation("CourseFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+  brochureMedia MediaAsset? @relation("CourseBrochure", fields: [brochureMediaId], references: [id], onDelete: SetNull)
   ogImage       MediaAsset? @relation("CourseOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
 
   benefits         CourseBenefit[]
@@ -504,6 +522,8 @@ model CourseCurriculumItem {
   courseId  String   @db.Uuid
   title     String
   bodyHtml  String?  @db.Text
+  /// Optional icon key for module cards (e.g. listening | reading | writing | speaking)
+  iconKey   String?
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -715,6 +735,7 @@ model MediaAsset {
   homepageSections     HomepageSection[]
   features             Feature[]
   coursesFeatured      Course[]            @relation("CourseFeaturedImage")
+  coursesBrochure      Course[]            @relation("CourseBrochure")
   coursesOgImage       Course[]            @relation("CourseOgImage")
   courseGalleryItems   CourseGalleryItem[]
   testimonials         Testimonial[]

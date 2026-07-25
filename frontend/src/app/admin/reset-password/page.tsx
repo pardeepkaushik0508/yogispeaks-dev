@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { Suspense } from 'react';
+import { PageLoader } from '@/components/ui/Spinner';
 
 const schema = z
   .object({
@@ -118,11 +119,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">Loading…</div>
-      }
-    >
+    <Suspense fallback={<PageLoader className="min-h-screen" />}>
       <ResetPasswordForm />
     </Suspense>
   );

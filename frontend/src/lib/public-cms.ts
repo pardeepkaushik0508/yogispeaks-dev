@@ -1,5 +1,12 @@
 import { apiFetch } from '@/lib/api-client';
-import type { CmsCourse, CmsPage, CmsTestimonial } from '@/lib/cms-types';
+import type {
+  CmsBlogCategory,
+  CmsBlogPost,
+  CmsCourse,
+  CmsFaq,
+  CmsPage,
+  CmsTestimonial,
+} from '@/lib/cms-types';
 
 export async function fetchPublishedPage(slug: string): Promise<CmsPage | null> {
   try {
@@ -68,15 +75,112 @@ export function asItemList(
 export function asCtaMeta(items: unknown): {
   buttonLabel?: string;
   buttonHref?: string;
+  secondaryLabel?: string;
+  secondaryHref?: string;
 } {
   if (items && typeof items === 'object' && !Array.isArray(items)) {
     const o = items as Record<string, unknown>;
     return {
       buttonLabel: typeof o.buttonLabel === 'string' ? o.buttonLabel : undefined,
       buttonHref: typeof o.buttonHref === 'string' ? o.buttonHref : undefined,
+      secondaryLabel:
+        typeof o.secondaryLabel === 'string' ? o.secondaryLabel : undefined,
+      secondaryHref:
+        typeof o.secondaryHref === 'string' ? o.secondaryHref : undefined,
     };
   }
   return {};
+}
+
+export function asBlockMeta(items: unknown): Record<string, string> {
+  if (items && typeof items === 'object' && !Array.isArray(items)) {
+    const o = items as Record<string, unknown>;
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(o)) {
+      if (typeof value === 'string') out[key] = value;
+    }
+    return out;
+  }
+  return {};
+}
+
+export async function fetchVisibleFaqs(): Promise<CmsFaq[]> {
+  try {
+    const rows = await apiFetch<CmsFaq[]>(`/public/faqs`, {
+      credentials: 'omit',
+      next: { revalidate: 60 },
+    } as RequestInit & { next?: { revalidate: number } });
+    return rows.filter((f) => !f.courseId);
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchBlogPosts(): Promise<CmsBlogPost[]> {
+  try {
+    return await apiFetch<CmsBlogPost[]>(`/public/blogs`, {
+      credentials: 'omit',
+      next: { revalidate: 60 },
+    } as RequestInit & { next?: { revalidate: number } });
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchBlogPost(slug: string): Promise<CmsBlogPost | null> {
+  try {
+    return await apiFetch<CmsBlogPost>(`/public/blogs/${slug}`, {
+      credentials: 'omit',
+      next: { revalidate: 60 },
+    } as RequestInit & { next?: { revalidate: number } });
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchBlogCategories(): Promise<CmsBlogCategory[]> {
+  try {
+    return await apiFetch<CmsBlogCategory[]>(`/public/blog-categories`, {
+      credentials: 'omit',
+      next: { revalidate: 60 },
+    } as RequestInit & { next?: { revalidate: number } });
+  } catch {
+    return [];
+  }
+}
+
+export type InquiryPayload = {
+  fullName?: string;
+  name?: string;
+  email: string;
+  mobile?: string;
+  phone?: string;
+  preferredCourse?: string;
+  currentLevel?: string;
+  preferredTiming?: string;
+  learningGoal?: string;
+  country?: string;
+  type?: 'ASSESSMENT' | 'CONTACT';
+  sourcePage?: string;
+};
+
+export async function submitInquiry(body: InquiryPayload): Promise<void> {
+  await apiFetch(`/public/inquiries`, {
+    method: 'POST',
+    body,
+    credentials: 'omit',
+  });
+}
+
+export async function subscribeNewsletter(
+  email: string,
+  source?: string,
+): Promise<void> {
+  await apiFetch(`/public/newsletter`, {
+    method: 'POST',
+    body: { email, source },
+    credentials: 'omit',
+  });
 }
 
 /** Strip tags for plain-text surfaces (FAQ accordion). */

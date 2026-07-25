@@ -5,7 +5,7 @@ export const siteContact = {
   emailHref: 'mailto:hello@yogispeaks.com',
   whatsapp: 'https://wa.me/919873160236',
   address: 'New Delhi, India',
-  hours: 'Mon–Sat · 10:00 AM – 7:00 PM IST',
+  hours: 'Mon–Sat · 8:00 AM – 9:00 PM IST',
 };
 
 /** In-page anchors for homepage sections; inner marketing routes are live. */
@@ -37,15 +37,16 @@ export const navLinks = [
     href: '/courses',
     children: [
       { label: 'Spoken English', href: '/courses/spoken-english' },
-      { label: 'IELTS Preparation', href: '/courses' },
+      { label: 'IELTS Preparation', href: '/courses/ielts-preparation' },
       { label: 'Professional Communication', href: '/courses' },
       { label: 'Personality Development', href: '/courses' },
       { label: 'Spoken Hindi', href: '/courses' },
     ],
   },
-  { label: 'Reviews', href: homepageAnchors.testimonials },
-  { label: 'Blog', href: homepageAnchors.newsletter },
-  { label: 'Contact', href: siteContact.whatsapp },
+  { label: 'Reviews', href: '/reviews' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export const heroContent = {

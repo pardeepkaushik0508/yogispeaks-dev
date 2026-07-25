@@ -15,6 +15,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/lib/cn';
+import { ApiError } from '@/lib/api-client';
+import { submitInquiry } from '@/lib/public-cms';
 
 const assessmentSchema = z.object({
   name: z
@@ -77,6 +79,7 @@ function AssessmentModal({
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const {
     register,
@@ -114,6 +117,7 @@ function AssessmentModal({
     if (!open) {
       const t = window.setTimeout(() => {
         setSubmitted(false);
+        setSubmitError('');
         reset();
       }, 280);
       return () => window.clearTimeout(t);
@@ -126,9 +130,25 @@ function AssessmentModal({
     return () => window.clearTimeout(t);
   }, [submitted, onClose]);
 
-  const onSubmit = handleSubmit(async () => {
-    await new Promise((r) => setTimeout(r, 450));
-    setSubmitted(true);
+  const onSubmit = handleSubmit(async (values) => {
+    setSubmitError('');
+    try {
+      await submitInquiry({
+        fullName: values.name,
+        email: values.email,
+        mobile: values.phone,
+        learningGoal: values.goal,
+        type: 'ASSESSMENT',
+        sourcePage: 'homepage-modal',
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(
+        err instanceof ApiError
+          ? err.message
+          : 'Something went wrong. Please try again.',
+      );
+    }
   });
 
   if (!mounted) return null;
@@ -290,6 +310,11 @@ function AssessmentModal({
                     >
                       {isSubmitting ? 'Submitting…' : 'Submit request'}
                     </button>
+                    {submitError ? (
+                      <p className="text-center text-xs font-medium text-[var(--color-danger)]" role="alert">
+                        {submitError}
+                      </p>
+                    ) : null}
                     <p className="text-center text-[11px] text-[var(--color-muted)]">
                       No obligation · 100% free · We respect your privacy
                     </p>

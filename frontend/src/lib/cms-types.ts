@@ -51,6 +51,7 @@ export type CourseCurriculumItem = {
   id: string;
   title: string;
   bodyHtml: string | null;
+  iconKey: string | null;
   sortOrder: number;
 };
 export type CourseFaq = {
@@ -70,6 +71,21 @@ export type CmsCourse = {
   whyLearnHtml: string | null;
   whoShouldJoinHtml: string | null;
   whyChooseHtml: string | null;
+  whyLearnTitle: string | null;
+  whoShouldJoinTitle: string | null;
+  whoShouldJoinIntro: string | null;
+  curriculumTitle: string | null;
+  featuresTitle: string | null;
+  benefitsTitle: string | null;
+  benefitsIntro: string | null;
+  learningStepsTitle: string | null;
+  whyChooseTitle: string | null;
+  testimonialsTitle: string | null;
+  faqsTitle: string | null;
+  finalCtaHeadline: string | null;
+  finalCtaBody: string | null;
+  finalSecondaryCtaLabel: string | null;
+  stickyCtaLabel: string | null;
   duration: string;
   mode: string;
   ctaLabel: string | null;
@@ -83,7 +99,8 @@ export type CmsCourse = {
   learningSteps: CourseLearningStep[];
   curriculumItems: CourseCurriculumItem[];
   faqs: CourseFaq[];
-  featuredImage?: { url?: string; publicUrl?: string } | null;
+  featuredImage?: { id?: string; url?: string; publicUrl?: string; mimeType?: string } | null;
+  brochureMedia?: { id?: string; url?: string; publicUrl?: string; mimeType?: string; title?: string } | null;
 };
 
 export type CmsTestimonial = {
@@ -93,4 +110,34 @@ export type CmsTestimonial = {
   courseLabel: string | null;
   review: string;
   rating: number;
+};
+
+export type CmsFaq = {
+  id: string;
+  question: string;
+  answerHtml: string;
+  category: string | null;
+  courseId?: string | null;
+  sortOrder: number;
+};
+
+export type CmsBlogCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+};
+
+export type CmsBlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  bodyHtml: string;
+  authorName: string;
+  publishedAt: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  category?: CmsBlogCategory | null;
+  featuredImage?: { url?: string; publicUrl?: string } | null;
 };

@@ -7,6 +7,7 @@ import { ADMIN_NAV } from '@/lib/admin-nav';
 import { hasPermission } from '@/lib/admin-auth';
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider';
 import { useAdminApi } from '@/hooks/useAdminApi';
+import { CardGridSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import { ApiError } from '@/lib/api-client';
 
 type Stats = {
@@ -25,12 +26,16 @@ export default function AdminDashboardPage() {
   const { user } = useAdminAuth();
   const { get } = useAdminApi();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     try {
       setStats(await get<Stats>('/admin/dashboard/stats'));
     } catch (err) {
       if (!(err instanceof ApiError)) return;
+    } finally {
+      setLoading(false);
     }
   }, [get]);
 
@@ -60,37 +65,51 @@ export default function AdminDashboardPage() {
       </p>
 
       <PermissionGate permission="dashboard.read">
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map(([label, key]) => (
-            <div
-              key={key}
-              className="rounded-md border border-slate-200 bg-white p-4"
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {label}
-              </p>
-              <p className="mt-2 text-2xl font-bold text-slate-900">
-                {stats?.counts?.[key] ?? '—'}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {stats?.recentInquiries?.length ? (
-          <div className="mt-8 rounded-md border bg-white p-4">
-            <h3 className="text-sm font-semibold">Recent inquiries</h3>
-            <ul className="mt-3 space-y-2 text-sm">
-              {stats.recentInquiries.map((i) => (
-                <li key={i.id} className="flex justify-between gap-2 border-b py-2 last:border-0">
-                  <span>
-                    {i.fullName} · {i.email}
-                  </span>
-                  <span className="text-slate-500">{i.status}</span>
-                </li>
+        {loading ? (
+          <div className="mt-6 space-y-8">
+            <CardGridSkeleton cards={4} />
+            <div className="rounded-md border bg-white p-4 space-y-3">
+              <Skeleton className="h-4 w-36" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
               ))}
-            </ul>
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {cards.map(([label, key]) => (
+                <div
+                  key={key}
+                  className="rounded-md border border-slate-200 bg-white p-4"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                    {stats?.counts?.[key] ?? '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {stats?.recentInquiries?.length ? (
+              <div className="mt-8 rounded-md border bg-white p-4">
+                <h3 className="text-sm font-semibold">Recent inquiries</h3>
+                <ul className="mt-3 space-y-2 text-sm">
+                  {stats.recentInquiries.map((i) => (
+                    <li key={i.id} className="flex justify-between gap-2 border-b py-2 last:border-0">
+                      <span>
+                        {i.fullName} · {i.email}
+                      </span>
+                      <span className="text-slate-500">{i.status}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </>
+        )}
       </PermissionGate>
 
       <div className="mt-8">

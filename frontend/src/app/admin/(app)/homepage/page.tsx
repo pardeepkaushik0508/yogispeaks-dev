@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import { useToast } from '@/components/admin/Toast';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { ApiError } from '@/lib/api-client';
 
 type Bundle = {
@@ -89,7 +90,16 @@ export default function HomepageAdminPage() {
         Sections, stats, features, steps, and benefits.
       </p>
       {loading || !bundle ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-md border bg-white p-4 space-y-3">
+              <Skeleton className="h-5 w-40" />
+              {Array.from({ length: 4 }).map((__, j) => (
+                <Skeleton key={j} className="h-8 w-full" />
+              ))}
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <section className="rounded-md border bg-white p-4">

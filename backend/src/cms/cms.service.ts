@@ -20,6 +20,7 @@ export class CmsService {
     curriculumItems: { orderBy: { sortOrder: 'asc' as const } },
     galleryItems: true,
     featuredImage: true,
+    brochureMedia: true,
     faqs: {
       where: { deletedAt: null, isVisible: true },
       orderBy: { sortOrder: 'asc' as const },
@@ -173,11 +174,27 @@ export class CmsService {
         isFeatured: rest.isFeatured ?? false,
         sortOrder: rest.sortOrder ?? 0,
         featuredImageId: rest.featuredImageId,
+        brochureMediaId: rest.brochureMediaId,
         eligibilityHtml: rest.eligibilityHtml ? sanitizeRichTextHtml(rest.eligibilityHtml) : null,
         whoShouldJoinHtml: rest.whoShouldJoinHtml ? sanitizeRichTextHtml(rest.whoShouldJoinHtml) : null,
         whyLearnHtml: rest.whyLearnHtml ? sanitizeRichTextHtml(rest.whyLearnHtml) : null,
         whyChooseHtml: rest.whyChooseHtml ? sanitizeRichTextHtml(rest.whyChooseHtml) : null,
         heroHeadline: rest.heroHeadline,
+        whyLearnTitle: rest.whyLearnTitle,
+        whoShouldJoinTitle: rest.whoShouldJoinTitle,
+        whoShouldJoinIntro: rest.whoShouldJoinIntro,
+        curriculumTitle: rest.curriculumTitle,
+        featuresTitle: rest.featuresTitle,
+        benefitsTitle: rest.benefitsTitle,
+        benefitsIntro: rest.benefitsIntro,
+        learningStepsTitle: rest.learningStepsTitle,
+        whyChooseTitle: rest.whyChooseTitle,
+        testimonialsTitle: rest.testimonialsTitle,
+        faqsTitle: rest.faqsTitle,
+        finalCtaHeadline: rest.finalCtaHeadline,
+        finalCtaBody: rest.finalCtaBody,
+        finalSecondaryCtaLabel: rest.finalSecondaryCtaLabel,
+        stickyCtaLabel: rest.stickyCtaLabel,
         secondaryCtaLabel: rest.secondaryCtaLabel,
         secondaryCtaHref: rest.secondaryCtaHref,
         ctaLabel: rest.ctaLabel,
@@ -212,6 +229,7 @@ export class CmsService {
               create: curriculumItems.map((c: any, i: number) => ({
                 title: c.title,
                 bodyHtml: c.bodyHtml ? sanitizeRichTextHtml(c.bodyHtml) : null,
+                iconKey: c.iconKey ?? null,
                 sortOrder: c.sortOrder ?? i,
               })),
             }
@@ -285,6 +303,7 @@ export class CmsService {
             courseId: id,
             title: c.title,
             bodyHtml: c.bodyHtml ? sanitizeRichTextHtml(c.bodyHtml) : null,
+            iconKey: c.iconKey ?? null,
             sortOrder: c.sortOrder ?? i,
           })),
         });
@@ -321,6 +340,8 @@ export class CmsService {
       curriculumItems: _ci,
       galleryItems: _gi,
       featuredImage: _fi,
+      brochureMedia: _bm,
+      ogImage: _ogi,
       faqs: _faqs,
       inquiries: _inq,
       ...safe
@@ -330,6 +351,12 @@ export class CmsService {
       where: { id },
       data: {
         ...safe,
+        ...(rest.featuredImageId !== undefined
+          ? { featuredImageId: rest.featuredImageId || null }
+          : {}),
+        ...(rest.brochureMediaId !== undefined
+          ? { brochureMediaId: rest.brochureMediaId || null }
+          : {}),
         ...(rest.longDescriptionHtml !== undefined
           ? { longDescriptionHtml: sanitizeRichTextHtml(rest.longDescriptionHtml) }
           : {}),
@@ -477,6 +504,14 @@ export class CmsService {
   }
   async getBlogPost(id: string) {
     const row = await this.prisma.blogPost.findFirst({ where: { id, deletedAt: null }, include: { category: true } });
+    if (!row) throw new NotFoundException('Post not found');
+    return row;
+  }
+  async getBlogPostBySlug(slug: string) {
+    const row = await this.prisma.blogPost.findFirst({
+      where: { slug, deletedAt: null, status: PublishStatus.PUBLISHED },
+      include: { category: true, featuredImage: true },
+    });
     if (!row) throw new NotFoundException('Post not found');
     return row;
   }

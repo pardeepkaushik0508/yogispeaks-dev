@@ -90,7 +90,7 @@ export function ProgramsSection() {
                 </p>
                 <Link
                   href={
-                    program.slug === 'spoken-english'
+                    program.slug === 'spoken-english' || program.slug === 'ielts-preparation'
                       ? `/courses/${program.slug}`
                       : `/courses`
                   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { FileText } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api-client';
 import { getAccessToken } from '@/lib/admin-auth';
 import { useToast } from '@/components/admin/Toast';
@@ -15,20 +16,32 @@ export type MediaAsset = {
   byteSize: number;
 };
 
-function absoluteUrl(url: string) {
+export function absoluteMediaUrl(url: string) {
   if (url.startsWith('http')) return url;
-  const api = publicEnv.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '');
+  const api = String(publicEnv.NEXT_PUBLIC_API_URL || '').replace(
+    /\/api\/v1\/?$/,
+    '',
+  );
   return `${api}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+function isImage(mime?: string | null) {
+  return !!mime && mime.startsWith('image/');
 }
 
 export function MediaPicker({
   value,
   onChange,
   label = 'Media',
+  accept = 'image/*',
+  hint,
 }: {
   value?: string | null;
   onChange: (id: string | null, asset?: MediaAsset | null) => void;
   label?: string;
+  /** File input accept attribute, e.g. image/* or .pdf,application/pdf,image/* */
+  accept?: string;
+  hint?: string;
 }) {
   const { push } = useToast();
   const [open, setOpen] = useState(false);
@@ -62,7 +75,7 @@ export function MediaPicker({
       const form = new FormData();
       form.append('file', file);
       const res = await fetch(
-        `${publicEnv.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}/admin/media/upload`,
+        `${String(publicEnv.NEXT_PUBLIC_API_URL).replace(/\/$/, '')}/admin/media/upload`,
         {
           method: 'POST',
           credentials: 'include',
@@ -90,14 +103,24 @@ export function MediaPicker({
   return (
     <div>
       <p className="text-sm font-medium text-slate-800">{label}</p>
+      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
       <div className="mt-2 flex items-center gap-3">
         {selected ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={absoluteUrl(selected.url)}
-            alt={selected.alt ?? ''}
-            className="size-16 rounded object-cover"
-          />
+          isImage(selected.mimeType) ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={absoluteMediaUrl(selected.url)}
+              alt={selected.alt ?? ''}
+              className="size-16 rounded object-cover"
+            />
+          ) : (
+            <div className="flex size-16 flex-col items-center justify-center rounded bg-slate-100 text-[var(--color-primary)]">
+              <FileText className="size-6" aria-hidden />
+              <span className="mt-0.5 max-w-[3.5rem] truncate px-1 text-[9px]">
+                {selected.title || 'File'}
+              </span>
+            </div>
+          )
         ) : (
           <div className="flex size-16 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
             None
@@ -108,7 +131,7 @@ export function MediaPicker({
           onClick={() => setOpen(true)}
           className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
         >
-          Choose
+          Choose / Upload
         </button>
         {value ? (
           <button
@@ -123,6 +146,16 @@ export function MediaPicker({
           </button>
         ) : null}
       </div>
+      {selected?.url ? (
+        <a
+          href={absoluteMediaUrl(selected.url)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-xs font-medium text-slate-600 underline"
+        >
+          Open current file
+        </a>
+      ) : null}
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -137,7 +170,7 @@ export function MediaPicker({
               {uploading ? 'Uploading…' : 'Upload file'}
               <input
                 type="file"
-                accept="image/*"
+                accept={accept}
                 className="hidden"
                 disabled={uploading}
                 onChange={(e) => {
@@ -158,12 +191,21 @@ export function MediaPicker({
                       setOpen(false);
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={absoluteUrl(item.url)}
-                      alt={item.alt ?? ''}
-                      className="aspect-square w-full object-cover"
-                    />
+                    {isImage(item.mimeType) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={absoluteMediaUrl(item.url)}
+                        alt={item.alt ?? ''}
+                        className="aspect-square w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 bg-slate-50 p-2 text-center">
+                        <FileText className="size-8 text-slate-500" aria-hidden />
+                        <span className="line-clamp-2 text-[10px] text-slate-600">
+                          {item.title || item.mimeType}
+                        </span>
+                      </div>
+                    )}
                   </button>
                 </li>
               ))}

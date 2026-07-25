@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { PermissionGate } from '@/components/admin/PermissionGate';
 import { useAdminApi } from '@/hooks/useAdminApi';
 import { useToast } from '@/components/admin/Toast';
+import { FormSkeleton } from '@/components/ui/Skeleton';
+import { ButtonSpinner } from '@/components/ui/Spinner';
 import { ApiError } from '@/lib/api-client';
 
 export default function SiteSettingsPage() {
@@ -87,7 +89,7 @@ export default function SiteSettingsPage() {
       <h2 className="text-2xl font-bold text-slate-900">Site settings</h2>
       <p className="text-sm text-slate-500">Brand, contact, and SEO defaults.</p>
       {loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <FormSkeleton fields={6} />
       ) : (
         <div className="mt-6 max-w-2xl space-y-3 rounded-md border bg-white p-6">
           {fields.map((name) => (
@@ -106,8 +108,9 @@ export default function SiteSettingsPage() {
             type="button"
             disabled={busy}
             onClick={() => void save()}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
+            {busy ? <ButtonSpinner /> : null}
             {busy ? 'Saving…' : 'Save settings'}
           </button>
         </div>
