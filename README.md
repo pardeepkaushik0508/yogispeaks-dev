@@ -22,8 +22,11 @@ cd frontend && pnpm install && pnpm dev
 |-----|-----|
 | Site | http://localhost:3000 |
 | Admin | http://localhost:3000/admin/login |
-| API | http://localhost:4000/api/v1 |
-| Swagger | http://localhost:4000/api/docs |
+| API (local) | http://localhost:4000/api/v1 |
+| API (Render) | https://yogispeaks-backend.onrender.com/api/v1 |
+| Swagger (local) | http://localhost:4000/api/docs |
+
+Deployed backend requires the env keys in `backend/render.env.example` (set them in the Render dashboard — never commit secrets).
 
 Admin user comes from `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (seed).
 

@@ -63,7 +63,7 @@ cp frontend/.env.example frontend/.env.local
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | ≥ 32 characters each |
 | `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` | Seed creates this admin; password ≥ 12 chars |
 | `CORS_ORIGINS` / `FRONTEND_URL` | Must match the URL you open in the browser |
-| `NEXT_PUBLIC_API_URL` | Browser calls this (local: `http://localhost:4000/api/v1`) |
+| `NEXT_PUBLIC_API_URL` | Browser API base. Local: `http://localhost:4000/api/v1`. Deployed: `https://yogispeaks-backend.onrender.com/api/v1` |
 
 Example local `DATABASE_URL`:
 
@@ -178,6 +178,22 @@ pnpm build                  # production build check
 | Admin 401 after restart | Re-seed or reset password; check you’re hitting the same API as `NEXT_PUBLIC_API_URL` |
 | Port already in use | Stop other apps on 3000/4000/5432 or change ports in `.env` |
 | pnpm not found | `corepack enable` then `corepack prepare pnpm@10 --activate` |
+
+---
+
+## Render deploy (backend)
+
+Public API: `https://yogispeaks-backend.onrender.com/api/v1`
+
+1. In the Render service → **Environment**, add every key from `backend/render.env.example`.
+2. Required for boot (these caused the last crash when missing):
+   - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` (≥ 32 chars each)
+   - `FRONTEND_URL` / `CORS_ORIGINS` (your real frontend origin(s))
+   - `COOKIE_SECURE=true`
+   - `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (≥ 12 chars)
+   - `MEDIA_PROVIDER=local` (or `cloudinary` / `s3`)
+3. Link a Render Postgres so `DATABASE_URL` is set.
+4. Frontend must use `NEXT_PUBLIC_API_URL=https://yogispeaks-backend.onrender.com/api/v1`.
 
 ---
 

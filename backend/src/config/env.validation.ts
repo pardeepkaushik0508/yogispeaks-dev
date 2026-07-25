@@ -39,11 +39,14 @@ const envSchema = z
     JWT_REFRESH_SECRET: z
       .string()
       .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
-    JWT_ACCESS_EXPIRES_IN: z.string().min(1),
-    JWT_REFRESH_EXPIRES_IN: z.string().min(1),
+    JWT_ACCESS_EXPIRES_IN: z.string().min(1).default('15m'),
+    JWT_REFRESH_EXPIRES_IN: z.string().min(1).default('7d'),
     FRONTEND_URL: z.string().url('FRONTEND_URL must be a valid URL'),
     CORS_ORIGINS: corsOriginsSchema,
-    COOKIE_SECURE: booleanStringSchema,
+    COOKIE_SECURE: z.preprocess(
+      (value) => (value === '' || value === undefined ? 'false' : value),
+      booleanStringSchema,
+    ),
     SUPER_ADMIN_EMAIL: z.string().email('SUPER_ADMIN_EMAIL must be a valid email'),
     SUPER_ADMIN_PASSWORD: z
       .string()
@@ -64,7 +67,7 @@ const envSchema = z
       z.string().email().optional(),
     ),
     SMTP_FROM_NAME: optionalString,
-    MEDIA_PROVIDER: z.enum(['local', 'cloudinary', 's3']),
+    MEDIA_PROVIDER: z.enum(['local', 'cloudinary', 's3']).default('local'),
     CLOUDINARY_CLOUD_NAME: optionalString,
     CLOUDINARY_API_KEY: optionalString,
     CLOUDINARY_API_SECRET: optionalString,
