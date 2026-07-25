@@ -1,6 +1,6 @@
 'use client';
 
-import DOMPurify from 'isomorphic-dompurify';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 
 export function RichHtml({
@@ -10,9 +10,26 @@ export function RichHtml({
   html: string;
   className?: string;
 }) {
-  const clean = DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-  });
+  const [clean, setClean] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    void import('dompurify').then(({ default: DOMPurify }) => {
+      if (active) {
+        setClean(
+          DOMPurify.sanitize(html, {
+            USE_PROFILES: { html: true },
+          }),
+        );
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [html]);
+
   return (
     <div
       className={cn(
