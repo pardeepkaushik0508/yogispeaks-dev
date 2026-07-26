@@ -1,3 +1,6 @@
+-- Required for CITEXT columns (email uniqueness, case-insensitive)
+CREATE EXTENSION IF NOT EXISTS "citext";
+
 -- CreateEnum
 CREATE TYPE "AdminStatus" AS ENUM ('ACTIVE', 'INACTIVE');
 

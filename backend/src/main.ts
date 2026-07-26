@@ -24,30 +24,63 @@ async function bootstrap(): Promise<void> {
   );
   app.use(cookieParser());
 
-  const corsOrigins =
-    configService.get<string[]>('cors.origins') ??
-    configService.get<string[]>('CORS_ORIGINS') ??
-    [];
-  const frontendUrl =
-    configService.get<string>('frontend.url') ??
-    configService.get<string>('FRONTEND_URL');
+  /** Never spread a raw string (that yields single characters as "origins"). */
+  const normalizeOrigins = (value: unknown): string[] => {
+    const parts = Array.isArray(value)
+      ? value.map(String)
+      : typeof value === 'string'
+        ? value.split(',')
+        : [];
+
+    return parts
+      .map((origin) => origin.trim().replace(/\/$/, ''))
+      .filter((origin) => origin.length > 0 && origin.includes('://'));
+  };
+
   const allowedOrigins = Array.from(
-    new Set(
-      [...corsOrigins, frontendUrl].filter(
-        (origin): origin is string => Boolean(origin),
-      ),
-    ),
+    new Set([
+      ...normalizeOrigins(configService.get('cors.origins')),
+      ...normalizeOrigins(configService.get('CORS_ORIGINS')),
+      ...normalizeOrigins(configService.get('frontend.url')),
+      ...normalizeOrigins(configService.get('FRONTEND_URL')),
+    ]),
   );
 
+  const isAllowedOrigin = (origin: string): boolean => {
+    const normalized = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalized)) {
+      return true;
+    }
+    // Render preview / static hostnames change; allow HTTPS *.onrender.com
+    try {
+      const host = new URL(normalized).hostname.toLowerCase();
+      return host.endsWith('.onrender.com');
+    } catch {
+      return false;
+    }
+  };
+
   app.enableCors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    origin: (origin, callback) => {
+      // Non-browser clients (no Origin) are allowed.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'X-Requested-With',
+    ],
   });
 
   logger.log(
-    `CORS origins: ${allowedOrigins.join(', ') || '(reflect request)'}`,
+    `CORS origins: ${allowedOrigins.join(', ') || '(none listed)'} + *.onrender.com`,
   );
 
   app.setGlobalPrefix('api/v1', {

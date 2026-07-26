@@ -188,12 +188,13 @@ Public API: `https://yogispeaks-backend.onrender.com/api/v1`
 1. In the Render service → **Environment**, add every key from `backend/render.env.example`.
 2. Required for boot (these caused the last crash when missing):
    - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` (≥ 32 chars each)
-   - `FRONTEND_URL` / `CORS_ORIGINS` (your real frontend origin(s))
+   - `FRONTEND_URL` / `CORS_ORIGINS` — **must include the live frontend origin**, e.g. `https://yogispeaks-l3vy.onrender.com` (localhost-only values cause admin login CORS / 405 preflight errors)
    - `COOKIE_SECURE=true`
    - `SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (≥ 12 chars)
    - `MEDIA_PROVIDER=local` (or `cloudinary` / `s3`)
 3. Link a Render Postgres so `DATABASE_URL` is set.
-4. Frontend must use `NEXT_PUBLIC_API_URL=https://yogispeaks-backend.onrender.com/api/v1`.
+4. Frontend must use `NEXT_PUBLIC_API_URL=https://yogispeaks-backend.onrender.com/api/v1` and `NEXT_PUBLIC_SITE_URL=https://yogispeaks-l3vy.onrender.com`.
+5. After changing `CORS_ORIGINS` / `FRONTEND_URL`, **Manual Deploy → Clear build cache & deploy** (or restart) the backend so CORS picks up the new origin.
 
 ---
 

@@ -395,23 +395,27 @@ export class AuthService {
     return { accessToken, sessionId: session.id };
   }
 
+  private refreshCookieOptions() {
+    // Cross-site admin (frontend.onrender.com → api.onrender.com) needs
+    // SameSite=None; Secure. Lax cookies are dropped by the browser on XHR.
+    const secure = this.configService.get<boolean>('cookie.secure') ?? false;
+    return {
+      httpOnly: true,
+      secure,
+      sameSite: (secure ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
+    };
+  }
+
   private setRefreshCookie(res: Response, token: string, maxAgeMs: number) {
     res.cookie(REFRESH_COOKIE, token, {
-      httpOnly: true,
-      secure: this.configService.get<boolean>('cookie.secure') ?? false,
-      sameSite: 'lax',
-      path: '/',
+      ...this.refreshCookieOptions(),
       maxAge: maxAgeMs,
     });
   }
 
   private clearRefreshCookie(res: Response) {
-    res.clearCookie(REFRESH_COOKIE, {
-      httpOnly: true,
-      secure: this.configService.get<boolean>('cookie.secure') ?? false,
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.clearCookie(REFRESH_COOKIE, this.refreshCookieOptions());
   }
 
   private async audit(
